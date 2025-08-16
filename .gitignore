@@ -60,3 +60,7 @@ Mkfile.old
 dkms.conf
 
 .metadata
+
+build/
+sdkconfig
+sdkconfig.old

@@ -3,8 +3,8 @@
  * @copyright  Copyright (C) 2019 Fiot Co., Ltd. All rights reserved.
  * @license    This project is released under the QuyLe License.
  * @version    1.0.0
- * @date       2023-08-19
- * @author     quyle-itr-intern
+ * @date       2025-08-30
+ * @author     Thach Nguyen Ba Vu
  *
  * @brief      handle i2c
  *
@@ -58,7 +58,7 @@ bool bsp_i2c1_is_device_ready(uint8_t address_device);
  * @param reg_write     Register of device
  * @param data_write    Data want to write
  * @param size_data     Size data want to write
- * @return true         Write success 
+ * @return true         Write success
  * @return false        Write fail
  */
 bool bsp_i2c1_write_mem(uint8_t address_slave, uint8_t reg_write, uint8_t *data_write, uint16_t size_data);
@@ -70,7 +70,7 @@ bool bsp_i2c1_write_mem(uint8_t address_slave, uint8_t reg_write, uint8_t *data_
  * @param reg_write     Register of device
  * @param data_write    Data want to write
  * @param size_data     Size data want to write
- * @return true         Write success 
+ * @return true         Write success
  * @return false        Write fail
  */
 bool bsp_i2c1_write_mem_dma(uint8_t address_slave, uint8_t reg_write, uint8_t *data_write, uint16_t size_data);

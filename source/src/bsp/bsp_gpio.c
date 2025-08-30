@@ -3,8 +3,8 @@
  * @copyright  Copyright (C) 2023 QuyLe Co., Ltd. All rights reserved.
  * @license    This project is released under the QuyLe License.
  * @version    v1.0.0
- * @date       2023-08-20
- * @author     quyle-itr-intern
+ * @date       2025-08
+ * @author     Loc Le
  *
  * @brief      handle gpio
  *

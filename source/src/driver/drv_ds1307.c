@@ -117,8 +117,9 @@ uint8_t calculate_day_of_week(uint8_t day, uint8_t month, uint8_t year)
     uint16_t year_of_century = year % 100;
 
     /* Zeller's Congruence */
-    uint16_t day_of_week =
-      (day + ((13 * (month + 1)) / 5) + year_of_century + (year_of_century / 4) + (century / 4) - (2 * century)) % 7;
+    uint16_t day_of_week = (day + ((13 * (month + 1)) / 5) + year_of_century + (year_of_century / 4)
+                            + (century / 4) - (2 * century))
+                           % 7;
 
     if (day_of_week < 0)
     {
@@ -206,16 +207,19 @@ bool ds1307_set_hour_24h(ds1307_t *ds1307, char *buffer)
 bool ds1307_set_hour_12h(ds1307_t *ds1307, char *buffer)
 {
     /* Check if hour is invalid */
-    if (buffer[0] > '1' || (buffer[0] <= '1' && buffer[1] > '1') || ((buffer[2] != 'a') && (buffer[2] != 'p')))
+    if (buffer[0] > '1' || (buffer[0] <= '1' && buffer[1] > '1')
+        || ((buffer[2] != 'a') && (buffer[2] != 'p')))
         return false;
 
     uint8_t data;
 
     if (buffer[2] == 'a')
-        data = ((DS1307_FLAG_0X02_12_AM) | (((buffer[0] - '0') << 4) | ((buffer[1] - '0') & DS1307_MASK_HOUR)));
+        data =
+          ((DS1307_FLAG_0X02_12_AM) | (((buffer[0] - '0') << 4) | ((buffer[1] - '0') & DS1307_MASK_HOUR)));
 
     if (buffer[2] == 'p')
-        data = ((DS1307_FLAG_0X02_12_PM) | (((buffer[0] - '0') << 4) | ((buffer[1] - '0') & DS1307_MASK_HOUR)));
+        data =
+          ((DS1307_FLAG_0X02_12_PM) | (((buffer[0] - '0') << 4) | ((buffer[1] - '0') & DS1307_MASK_HOUR)));
 
     ds1307->i2c_write_at(ds1307->device_address, DS1307_REGISTER_HOUR, &data, 1);
 
@@ -232,18 +236,20 @@ rtc_t *ds1307_get_time(ds1307_t *ds1307)
     ds1307->i2c_read_at(ds1307->device_address, DS1307_REGISTER_MINUTE, (uint8_t *) &(rtc_reg.minute_reg),
                         sizeof(rtc_reg.minute_reg));
 
-    ds1307->i2c_read_at(ds1307->device_address, DS1307_REGISTER_HOUR, (uint8_t *) &(rtc_reg.hour_reg), sizeof(rtc_reg.hour_reg));
+    ds1307->i2c_read_at(ds1307->device_address, DS1307_REGISTER_HOUR, (uint8_t *) &(rtc_reg.hour_reg),
+                        sizeof(rtc_reg.hour_reg));
 
-    ds1307->i2c_read_at(ds1307->device_address, DS1307_REGISTER_DAY_OF_WEEK, (uint8_t *) &(rtc_reg.day_of_week_reg),
-                        sizeof(rtc_reg.day_of_week_reg));
+    ds1307->i2c_read_at(ds1307->device_address, DS1307_REGISTER_DAY_OF_WEEK,
+                        (uint8_t *) &(rtc_reg.day_of_week_reg), sizeof(rtc_reg.day_of_week_reg));
 
-    ds1307->i2c_read_at(ds1307->device_address, DS1307_REGISTER_DAY_OF_MONTH, (uint8_t *) &(rtc_reg.day_of_month_reg),
-                        sizeof(rtc_reg.day_of_month_reg));
+    ds1307->i2c_read_at(ds1307->device_address, DS1307_REGISTER_DAY_OF_MONTH,
+                        (uint8_t *) &(rtc_reg.day_of_month_reg), sizeof(rtc_reg.day_of_month_reg));
 
     ds1307->i2c_read_at(ds1307->device_address, DS1307_REGISTER_MONTH, (uint8_t *) &(rtc_reg.month_reg),
                         sizeof(rtc_reg.month_reg));
 
-    ds1307->i2c_read_at(ds1307->device_address, DS1307_REGISTER_YEAR, (uint8_t *) &(rtc_reg.year_reg), sizeof(rtc_reg.year_reg));
+    ds1307->i2c_read_at(ds1307->device_address, DS1307_REGISTER_YEAR, (uint8_t *) &(rtc_reg.year_reg),
+                        sizeof(rtc_reg.year_reg));
 
     /* Only keep bits have correct information */
     ds1307->rtc.second       = bcd_to_byte(rtc_reg.second_reg & DS1307_MASK_SECOND);
@@ -269,9 +275,10 @@ bool ds1307_set_time(ds1307_t *ds1307, char *buffer)
     ds1307_get_time(ds1307);
 
     /* Calculate day of week */
-    uint16_t year = (*(buffer) - '0') * 1000 + (*(buffer + 1) - '0') * 100 + (*(buffer + 2) - '0') * 10 + (*(buffer + 3) - '0');
-    uint8_t  day_of_week = calculate_day_of_week(ds1307->rtc.day_of_month, ds1307->rtc.month, year);
-    uint8_t  data        = byte_to_bcd(day_of_week) & DS1307_MASK_DAY_OF_WEEK;
+    uint16_t year = (*(buffer) - '0') * 1000 + (*(buffer + 1) - '0') * 100 + (*(buffer + 2) - '0') * 10
+                    + (*(buffer + 3) - '0');
+    uint8_t day_of_week = calculate_day_of_week(ds1307->rtc.day_of_month, ds1307->rtc.month, year);
+    uint8_t data        = byte_to_bcd(day_of_week) & DS1307_MASK_DAY_OF_WEEK;
     ds1307->i2c_write_at(ds1307->device_address, DS1307_REGISTER_DAY_OF_WEEK, &data, 1);
 
     ds1307_set_hour_24h(ds1307, &buffer[11]);

@@ -1,0 +1,71 @@
+{
+	// Place your global snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and 
+	// description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope 
+	// is left empty or omitted, the snippet gets applied to all languages. The prefix is what is 
+	// used to trigger the snippet and the body will be expanded and inserted. Possible variables are: 
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. 
+	// Placeholders with the same ids are connected.
+	// Copyright (C) 2025 NEO. All rights reserved.
+	// This project is released under the NEO License.
+	"comment header": {
+		"prefix": "cmt",
+		"body": "/* $1 ----------------------------------------------------------------- */"
+	},
+	"C Header Template": {
+		"prefix": "neo-header",
+		"body": [
+			"/**",
+			" * @file       $1.h",
+			" * @copyright  Copyright (C) $5 NEO. All rights reserved.",
+			" * @license    This project is released under the NEO License.",
+			" * @version    1.0.0",
+			" * @date       $5-$6",
+			" * @author     $4",
+			" * @brief      $3",
+			" * @note       None",
+			" */",
+			"",
+			"/* Define to prevent recursive inclusion ------------------------------ */",
+			"#ifndef __$2_H",
+			"#define __$2_H",
+			"",
+			"/* Includes ----------------------------------------------------------- */",
+			"/* Public defines ----------------------------------------------------- */",
+			"/* Public enumerate/structure ----------------------------------------- */",
+			"/* Public macros ------------------------------------------------------ */",
+			"/* Public variables --------------------------------------------------- */",
+			"/* Public function prototypes ----------------------------------------- */",
+			"\n",
+			"/* -------------------------------------------------------------------- */",
+			"#endif /* __$2_H */",
+			"",
+			"/* End of file -------------------------------------------------------- */\n"
+		]
+	},
+	"C Source Template": {
+		"prefix": "neo-src",
+		"body": [
+			"/**",
+			" * @file       $1.c",
+			" * @copyright  Copyright (C) $4 NEO. All rights reserved.",
+			" * @license    This project is released under the NEO License.",
+			" * @version    1.0.0",
+			" * @date       $4-$5",
+			" * @author     $3",
+			" * @brief      $2",
+			" * @note       None",
+			" */",
+			"/* Includes ----------------------------------------------------------- */",
+			"#include \"$1.h\"\n",
+			"/* Private defines ---------------------------------------------------- */",
+			"/* Private enumerate/structure ---------------------------------------- */",
+			"/* Private macros ----------------------------------------------------- */",
+			"/* Public variables --------------------------------------------------- */",
+			"/* Private variables -------------------------------------------------- */",
+			"/* Private function prototypes ---------------------------------------- */",
+			"/* Function definitions ----------------------------------------------- */",
+			"\n",
+			"/* End of file -------------------------------------------------------- */\n"
+		]
+	}
+}

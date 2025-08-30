@@ -4,6 +4,8 @@
 **/.vs
 **/obj
 **/.vscode
+.vscode/*
+!.vscode/c_template.code-snippets
 **/.settings
 *.xml
 **/Debug

@@ -1,13 +1,11 @@
 #include "base_type.h"
+#include "bsp_i2c.h"
 
 #include <stdio.h>
 
 void app_main(void)
 {
-    while (1)
-    {
-        /* code */
-        uint8_t        a = 1;
-        static uint8_t b = 2;
-    }
+    bool test_var = false;
+    test_var = bsp_i2c_init();
+    test_var == true ? printf("I2C Init Success\n") : printf("I2C Init Fail\n");
 }

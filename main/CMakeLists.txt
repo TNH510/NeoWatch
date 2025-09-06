@@ -1,4 +1,6 @@
 idf_component_register(SRCS "main.c"
+
+                    ${CMAKE_SOURCE_DIR}/source/src/bsp/bsp_i2c.c
                     INCLUDE_DIRS ".")
 
 include_directories(${CMAKE_SOURCE_DIR}/source/inc/bsp)

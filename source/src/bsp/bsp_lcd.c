@@ -120,7 +120,31 @@ static void m_increase_lvgl_tick(void *arg);
  * @param arg
  */
 static void m_lvgl_port_task(void *arg);
+/**
+ * @brief 
+ * 
+ * @param buf 
+ * @param x 
+ * @param y 
+ */
+static inline void _set_oled_pixel(uint8_t *buf, int x, int y);
+/**
+ * @brief 
+ * 
+ * @param buf 
+ */
+static void draw_smiley_to_buffer(uint8_t *buf);
+/**
+ * @brief 
+ * 
+ * @param src 
+ * @param dst 
+ * @param w 
+ * @param h 
+ */
+static void convert_horiz_msb_to_ssd1306(const uint8_t *src, uint8_t *dst, int w, int h);
 
+/* Function definitions ----------------------------------------------- */
 static inline void _set_oled_pixel(uint8_t *buf, int x, int y)
 {
     if (x < 0 || x >= LCD_H_RES || y < 0 || y >= LCD_V_RES)
@@ -167,7 +191,6 @@ static void convert_horiz_msb_to_ssd1306(const uint8_t *src, uint8_t *dst, int w
     }
 }
 
-/* Function definitions ----------------------------------------------- */
 base_status_t bsp_lcd_init(void)
 {
     ESP_LOGI(TAG, "Initialize I2C bus");

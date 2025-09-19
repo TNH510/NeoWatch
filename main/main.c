@@ -1,13 +1,11 @@
 #include "base_type.h"
+#include "bsp_i2c.h"
+#include "bsp_lcd.h"
 
 #include <stdio.h>
 
 void app_main(void)
 {
-    while (1)
-    {
-        /* code */
-        uint8_t        a = 1;
-        static uint8_t b = 2;
-    }
+    bsp_lcd_init();
+    bsp_lcd_clock_display();
 }

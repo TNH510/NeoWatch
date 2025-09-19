@@ -7,5 +7,5 @@
 void app_main(void)
 {
     bsp_lcd_init();
-    bsp_lcd_clock_display();
+    // bsp_lcd_clock_display();
 }

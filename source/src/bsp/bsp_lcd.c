@@ -18,6 +18,7 @@
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "lvgl.h"
+#include "video_frame.h"
 
 #include <esp_heap_caps.h>
 #include <sys/lock.h>
@@ -119,15 +120,97 @@ static void m_increase_lvgl_tick(void *arg);
  * @param arg
  */
 static void m_lvgl_port_task(void *arg);
+/**
+ * @brief 
+ * 
+ * @param buf 
+ * @param x 
+ * @param y 
+ */
+static inline void _set_oled_pixel(uint8_t *buf, int x, int y);
+/**
+ * @brief 
+ * 
+ * @param buf 
+ */
+static void draw_smiley_to_buffer(uint8_t *buf);
+/**
+ * @brief 
+ * 
+ * @param src 
+ * @param dst 
+ * @param w 
+ * @param h 
+ */
+static void convert_horiz_msb_to_ssd1306(const uint8_t *src, uint8_t *dst, int w, int h);
 
 /* Function definitions ----------------------------------------------- */
+static inline void _set_oled_pixel(uint8_t *buf, int x, int y)
+{
+    if (x < 0 || x >= LCD_H_RES || y < 0 || y >= LCD_V_RES)
+        return;
+    size_t  idx  = (size_t) x + ((size_t) (y >> 3) * (size_t) LCD_H_RES);
+    uint8_t mask = (uint8_t) (1u << (y & 7));
+    buf[idx] |= mask;
+}
+static void draw_smiley_to_buffer(uint8_t *buf)
+{
+    memset(buf, 0x00, LCD_H_RES * LCD_V_RES / 8);
+
+    // mắt
+    _set_oled_pixel(buf, 40, 20);
+    _set_oled_pixel(buf, 44, 20);
+    _set_oled_pixel(buf, 40, 24);
+    _set_oled_pixel(buf, 44, 24);
+
+    // miệng (đường cong đơn giản)
+    for (int x = 34; x <= 50; x++) _set_oled_pixel(buf, x, 40);
+    for (int x = 36; x <= 48; x++) _set_oled_pixel(buf, x, 41);
+    for (int x = 38; x <= 46; x++) _set_oled_pixel(buf, x, 42);
+}
+
+static void convert_horiz_msb_to_ssd1306(const uint8_t *src, uint8_t *dst, int w, int h)
+{
+    int bytes_per_row = w >> 3;
+    memset(dst, 0x00, (size_t) w * (size_t) h / 8);
+
+    for (int y = 0; y < h; ++y)
+    {
+        for (int x = 0; x < w; ++x)
+        {
+            int     src_idx  = y * bytes_per_row + (x >> 3);
+            uint8_t src_byte = src[src_idx];
+            int     src_bit  = 7 - (x & 7);  // MSB-first in row
+            bool    pixel_on = ((src_byte >> src_bit) & 0x1) != 0;
+            if (pixel_on)
+            {
+                size_t dst_idx = (size_t) x + ((size_t) (y >> 3) * (size_t) w);
+                dst[dst_idx] |= (uint8_t) (1u << (y & 7));
+            }
+        }
+    }
+}
+
 base_status_t bsp_lcd_init(void)
 {
     ESP_LOGI(TAG, "Initialize I2C bus");
     CHECK_STATUS(m_i2c_init());
     CHECK_STATUS(m_panel_init());
     CHECK_STATUS(m_driver_ssd1306_init());
-    m_graphic_init();
+
+    memset(oled_buffer, 0x00, sizeof(oled_buffer));
+    esp_lcd_panel_draw_bitmap(panel_handle, 0, 0, LCD_H_RES, LCD_V_RES, oled_buffer);
+    esp_lcd_panel_invert_color(panel_handle, false);
+
+    for (int i = 0; i < 142; i++)
+    {
+        convert_horiz_msb_to_ssd1306(throw_computer_video[i], oled_buffer, LCD_H_RES, LCD_V_RES);
+        esp_lcd_panel_draw_bitmap(panel_handle, 0, 0, LCD_H_RES, LCD_V_RES, oled_buffer);
+
+        // Delay 20ms
+        usleep(20000);
+    }
+
     return BS_OK;
 }
 
@@ -231,7 +314,7 @@ static base_status_t m_graphic_init(void)
     ESP_LOGI(TAG, "Initialize LVGL");
     lv_init();
     display = lv_display_create(LCD_H_RES, LCD_V_RES);
-    
+
     // associate the i2c panel handle to the display
     lv_display_set_user_data(display, panel_handle);
     // create draw buffer

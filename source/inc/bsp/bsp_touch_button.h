@@ -20,6 +20,12 @@
 /* Public variables --------------------------------------------------- */
 /* Public function prototypes ----------------------------------------- */
 
+/**
+ * @brief Initialize touch button 
+ * 
+ * @return ESP_OK on success
+ */
+esp_err_t bsp_touch_button_init(void);
 
 /* -------------------------------------------------------------------- */
 #endif /* __BSP_TOUCH_BUTTON_H */

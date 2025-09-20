@@ -59,6 +59,11 @@ static uint8_t oled_buffer[LCD_H_RES * LCD_V_RES / 8];
 // LVGL library is not thread-safe, this example will call LVGL APIs from different tasks, so use a mutex to
 // protect it
 static _lock_t lvgl_api_lock;
+// Biến kiểm soát animation task
+static TaskHandle_t  animation_task_handle = NULL;
+static volatile bool animation_running     = false;
+// Biến theo dõi video đang phát
+static uint8_t current_video = 0xFF; // 0xFF nghĩa là không có video nào đang phát
 
 // create a lvgl display
 lv_display_t *display;
@@ -121,26 +126,34 @@ static void m_increase_lvgl_tick(void *arg);
  */
 static void m_lvgl_port_task(void *arg);
 /**
- * @brief 
- * 
- * @param buf 
- * @param x 
- * @param y 
+ * @brief Animation task function
+ *
+ * @param arg Task arguments
+ */
+static void m_animation_task_1(void *arg);
+static void m_animation_task_2(void *arg);
+static void m_animation_task_3(void *arg);
+/**
+ * @brief
+ *
+ * @param buf
+ * @param x
+ * @param y
  */
 static inline void _set_oled_pixel(uint8_t *buf, int x, int y);
 /**
- * @brief 
- * 
- * @param buf 
+ * @brief
+ *
+ * @param buf
  */
 static void draw_smiley_to_buffer(uint8_t *buf);
 /**
- * @brief 
- * 
- * @param src 
- * @param dst 
- * @param w 
- * @param h 
+ * @brief
+ *
+ * @param src
+ * @param dst
+ * @param w
+ * @param h
  */
 static void convert_horiz_msb_to_ssd1306(const uint8_t *src, uint8_t *dst, int w, int h);
 
@@ -202,15 +215,6 @@ base_status_t bsp_lcd_init(void)
     esp_lcd_panel_draw_bitmap(panel_handle, 0, 0, LCD_H_RES, LCD_V_RES, oled_buffer);
     esp_lcd_panel_invert_color(panel_handle, false);
 
-    for (int i = 0; i < 142; i++)
-    {
-        convert_horiz_msb_to_ssd1306(throw_computer_video[i], oled_buffer, LCD_H_RES, LCD_V_RES);
-        esp_lcd_panel_draw_bitmap(panel_handle, 0, 0, LCD_H_RES, LCD_V_RES, oled_buffer);
-
-        // Delay 20ms
-        usleep(20000);
-    }
-
     return BS_OK;
 }
 
@@ -233,6 +237,52 @@ void bsp_lcd_clock_display(void)
     lv_obj_set_width(label, lv_display_get_horizontal_resolution(display));
     lv_obj_align(label, LV_ALIGN_TOP_MID, 0, 0);
     _lock_release(&lvgl_api_lock);
+}
+
+void bsp_lcd_demo_video(uint8_t video_num)
+{
+    if (video_num >= 3)
+    {
+        return;
+    }
+    
+    // Kiểm tra và dừng task đang chạy nếu có
+    if (animation_running && animation_task_handle != NULL)
+    {
+        // Đánh dấu để task dừng vòng lặp animation
+        animation_running = false;
+        
+        // Đợi một khoảng thời gian ngắn để task kết thúc vòng lặp hiện tại
+        vTaskDelay(pdMS_TO_TICKS(30));
+        
+        // Xóa task trước đó nếu nó chưa tự xóa
+        if (animation_task_handle != NULL)
+        {
+            vTaskDelete(animation_task_handle);
+            animation_task_handle = NULL;
+            ESP_LOGI(TAG, "Previous animation task stopped");
+        }
+    }
+    
+    // Tạo task mới cho video được chọn
+    if (video_num == 0)
+    {
+        // Tạo task chạy animation thay vì dùng vòng lặp for
+        animation_running = true;
+        xTaskCreate(m_animation_task_1, "anim_task", 2048, NULL, 3, &animation_task_handle);
+    }
+    else if (video_num == 1)
+    {
+        // Tạo task chạy animation thay vì dùng vòng lặp for
+        animation_running = true;
+        xTaskCreate(m_animation_task_2, "anim_task", 2048, NULL, 3, &animation_task_handle);
+    }
+    else if (video_num == 2)
+    {
+        // Tạo task chạy animation thay vì dùng vòng lặp for
+        animation_running = true;
+        xTaskCreate(m_animation_task_3, "anim_task", 2048, NULL, 3, &animation_task_handle);
+    }
 }
 
 static base_status_t m_i2c_init(void)
@@ -403,6 +453,90 @@ static bool m_notify_lvgl_flush_ready(esp_lcd_panel_io_handle_t      io_panel,
     lv_display_t *disp = (lv_display_t *) user_ctx;
     lv_display_flush_ready(disp);
     return false;
+}
+
+/**
+ * @brief Task để chạy animation
+ *
+ * @param arg Task arguments
+ */
+static void m_animation_task_1(void *arg)
+{
+    ESP_LOGI(TAG, "Animation task started");
+
+    // Chạy animation từ frame 0 đến frame 141
+    for (int i = 0; i < 60 && animation_running; i++)
+    {
+        // Chuyển đổi dữ liệu frame sang định dạng SSD1306
+        convert_horiz_msb_to_ssd1306(throw_computer_video[i], oled_buffer, LCD_H_RES, LCD_V_RES);
+
+        // Vẽ frame lên màn hình
+        esp_lcd_panel_draw_bitmap(panel_handle, 0, 0, LCD_H_RES, LCD_V_RES, oled_buffer);
+
+        // Delay để tạo hiệu ứng animation (20ms mỗi frame - 50 FPS)
+        vTaskDelay(pdMS_TO_TICKS(40));
+    }
+
+    ESP_LOGI(TAG, "Animation completed");
+    animation_running     = false;
+    animation_task_handle = NULL;
+    vTaskDelete(NULL);
+}
+
+/**
+ * @brief Task để chạy animation
+ *
+ * @param arg Task arguments
+ */
+static void m_animation_task_2(void *arg)
+{
+    ESP_LOGI(TAG, "Animation task started");
+
+    // Chạy animation từ frame 0 đến frame 60
+    for (int i = 0; i < 60 && animation_running; i++)
+    {
+        // Chuyển đổi dữ liệu frame sang định dạng SSD1306
+        convert_horiz_msb_to_ssd1306(em_chua_18_video[i], oled_buffer, LCD_H_RES, LCD_V_RES);
+
+        // Vẽ frame lên màn hình
+        esp_lcd_panel_draw_bitmap(panel_handle, 0, 0, LCD_H_RES, LCD_V_RES, oled_buffer);
+
+        // Delay để tạo hiệu ứng animation (20ms mỗi frame - 50 FPS)
+        vTaskDelay(pdMS_TO_TICKS(40));
+    }
+
+    ESP_LOGI(TAG, "Animation completed");
+    animation_running     = false;
+    animation_task_handle = NULL;
+    vTaskDelete(NULL);
+}
+
+/**
+ * @brief Task để chạy animation
+ *
+ * @param arg Task arguments
+ */
+static void m_animation_task_3(void *arg)
+{
+    ESP_LOGI(TAG, "Animation task started");
+
+    // Chạy animation từ frame 0 đến frame 60
+    for (int i = 0; i < 60 && animation_running; i++)
+    {
+        // Chuyển đổi dữ liệu frame sang định dạng SSD1306
+        convert_horiz_msb_to_ssd1306(meme_cuoi_video[i], oled_buffer, LCD_H_RES, LCD_V_RES);
+
+        // Vẽ frame lên màn hình
+        esp_lcd_panel_draw_bitmap(panel_handle, 0, 0, LCD_H_RES, LCD_V_RES, oled_buffer);
+
+        // Delay để tạo hiệu ứng animation (20ms mỗi frame - 50 FPS)
+        vTaskDelay(pdMS_TO_TICKS(40));
+    }
+
+    ESP_LOGI(TAG, "Animation completed");
+    animation_running     = false;
+    animation_task_handle = NULL;
+    vTaskDelete(NULL);
 }
 
 /* End of file -------------------------------------------------------- */

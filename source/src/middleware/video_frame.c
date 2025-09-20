@@ -19125,7 +19125,7 @@ const unsigned char meme_cuoi_0298[] = {
 };
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in = 309920)
-const unsigned char *meme_cuoi_video[298] = {
+const unsigned char *meme_cuoi_video[60] = {
     meme_cuoi_0001, meme_cuoi_0002, meme_cuoi_0003, meme_cuoi_0004, meme_cuoi_0005, meme_cuoi_0006, meme_cuoi_0007,
     meme_cuoi_0008, meme_cuoi_0009, meme_cuoi_0010, meme_cuoi_0011, meme_cuoi_0012, meme_cuoi_0013, meme_cuoi_0014,
     meme_cuoi_0015, meme_cuoi_0016, meme_cuoi_0017, meme_cuoi_0018, meme_cuoi_0019, meme_cuoi_0020, meme_cuoi_0021,
@@ -19134,41 +19134,7 @@ const unsigned char *meme_cuoi_video[298] = {
     meme_cuoi_0036, meme_cuoi_0037, meme_cuoi_0038, meme_cuoi_0039, meme_cuoi_0040, meme_cuoi_0041, meme_cuoi_0042,
     meme_cuoi_0043, meme_cuoi_0044, meme_cuoi_0045, meme_cuoi_0046, meme_cuoi_0047, meme_cuoi_0048, meme_cuoi_0049,
     meme_cuoi_0050, meme_cuoi_0051, meme_cuoi_0052, meme_cuoi_0053, meme_cuoi_0054, meme_cuoi_0055, meme_cuoi_0056,
-    meme_cuoi_0057, meme_cuoi_0058, meme_cuoi_0059, meme_cuoi_0060, meme_cuoi_0061, meme_cuoi_0062, meme_cuoi_0063,
-    meme_cuoi_0064, meme_cuoi_0065, meme_cuoi_0066, meme_cuoi_0067, meme_cuoi_0068, meme_cuoi_0069, meme_cuoi_0070,
-    meme_cuoi_0071, meme_cuoi_0072, meme_cuoi_0073, meme_cuoi_0074, meme_cuoi_0075, meme_cuoi_0076, meme_cuoi_0077,
-    meme_cuoi_0078, meme_cuoi_0079, meme_cuoi_0080, meme_cuoi_0081, meme_cuoi_0082, meme_cuoi_0083, meme_cuoi_0084,
-    meme_cuoi_0085, meme_cuoi_0086, meme_cuoi_0087, meme_cuoi_0088, meme_cuoi_0089, meme_cuoi_0090, meme_cuoi_0091,
-    meme_cuoi_0092, meme_cuoi_0093, meme_cuoi_0094, meme_cuoi_0095, meme_cuoi_0096, meme_cuoi_0097, meme_cuoi_0098,
-    meme_cuoi_0099, meme_cuoi_0100, meme_cuoi_0101, meme_cuoi_0102, meme_cuoi_0103, meme_cuoi_0104, meme_cuoi_0105,
-    meme_cuoi_0106, meme_cuoi_0107, meme_cuoi_0108, meme_cuoi_0109, meme_cuoi_0110, meme_cuoi_0111, meme_cuoi_0112,
-    meme_cuoi_0113, meme_cuoi_0114, meme_cuoi_0115, meme_cuoi_0116, meme_cuoi_0117, meme_cuoi_0118, meme_cuoi_0119,
-    meme_cuoi_0120, meme_cuoi_0121, meme_cuoi_0122, meme_cuoi_0123, meme_cuoi_0124, meme_cuoi_0125, meme_cuoi_0126,
-    meme_cuoi_0127, meme_cuoi_0128, meme_cuoi_0129, meme_cuoi_0130, meme_cuoi_0131, meme_cuoi_0132, meme_cuoi_0133,
-    meme_cuoi_0134, meme_cuoi_0135, meme_cuoi_0136, meme_cuoi_0137, meme_cuoi_0138, meme_cuoi_0139, meme_cuoi_0140,
-    meme_cuoi_0141, meme_cuoi_0142, meme_cuoi_0143, meme_cuoi_0144, meme_cuoi_0145, meme_cuoi_0146, meme_cuoi_0147,
-    meme_cuoi_0148, meme_cuoi_0149, meme_cuoi_0150, meme_cuoi_0151, meme_cuoi_0152, meme_cuoi_0153, meme_cuoi_0154,
-    meme_cuoi_0155, meme_cuoi_0156, meme_cuoi_0157, meme_cuoi_0158, meme_cuoi_0159, meme_cuoi_0160, meme_cuoi_0161,
-    meme_cuoi_0162, meme_cuoi_0163, meme_cuoi_0164, meme_cuoi_0165, meme_cuoi_0166, meme_cuoi_0167, meme_cuoi_0168,
-    meme_cuoi_0169, meme_cuoi_0170, meme_cuoi_0171, meme_cuoi_0172, meme_cuoi_0173, meme_cuoi_0174, meme_cuoi_0175,
-    meme_cuoi_0176, meme_cuoi_0177, meme_cuoi_0178, meme_cuoi_0179, meme_cuoi_0180, meme_cuoi_0181, meme_cuoi_0182,
-    meme_cuoi_0183, meme_cuoi_0184, meme_cuoi_0185, meme_cuoi_0186, meme_cuoi_0187, meme_cuoi_0188, meme_cuoi_0189,
-    meme_cuoi_0190, meme_cuoi_0191, meme_cuoi_0192, meme_cuoi_0193, meme_cuoi_0194, meme_cuoi_0195, meme_cuoi_0196,
-    meme_cuoi_0197, meme_cuoi_0198, meme_cuoi_0199, meme_cuoi_0200, meme_cuoi_0201, meme_cuoi_0202, meme_cuoi_0203,
-    meme_cuoi_0204, meme_cuoi_0205, meme_cuoi_0206, meme_cuoi_0207, meme_cuoi_0208, meme_cuoi_0209, meme_cuoi_0210,
-    meme_cuoi_0211, meme_cuoi_0212, meme_cuoi_0213, meme_cuoi_0214, meme_cuoi_0215, meme_cuoi_0216, meme_cuoi_0217,
-    meme_cuoi_0218, meme_cuoi_0219, meme_cuoi_0220, meme_cuoi_0221, meme_cuoi_0222, meme_cuoi_0223, meme_cuoi_0224,
-    meme_cuoi_0225, meme_cuoi_0226, meme_cuoi_0227, meme_cuoi_0228, meme_cuoi_0229, meme_cuoi_0230, meme_cuoi_0231,
-    meme_cuoi_0232, meme_cuoi_0233, meme_cuoi_0234, meme_cuoi_0235, meme_cuoi_0236, meme_cuoi_0237, meme_cuoi_0238,
-    meme_cuoi_0239, meme_cuoi_0240, meme_cuoi_0241, meme_cuoi_0242, meme_cuoi_0243, meme_cuoi_0244, meme_cuoi_0245,
-    meme_cuoi_0246, meme_cuoi_0247, meme_cuoi_0248, meme_cuoi_0249, meme_cuoi_0250, meme_cuoi_0251, meme_cuoi_0252,
-    meme_cuoi_0253, meme_cuoi_0254, meme_cuoi_0255, meme_cuoi_0256, meme_cuoi_0257, meme_cuoi_0258, meme_cuoi_0259,
-    meme_cuoi_0260, meme_cuoi_0261, meme_cuoi_0262, meme_cuoi_0263, meme_cuoi_0264, meme_cuoi_0265, meme_cuoi_0266,
-    meme_cuoi_0267, meme_cuoi_0268, meme_cuoi_0269, meme_cuoi_0270, meme_cuoi_0271, meme_cuoi_0272, meme_cuoi_0273,
-    meme_cuoi_0274, meme_cuoi_0275, meme_cuoi_0276, meme_cuoi_0277, meme_cuoi_0278, meme_cuoi_0279, meme_cuoi_0280,
-    meme_cuoi_0281, meme_cuoi_0282, meme_cuoi_0283, meme_cuoi_0284, meme_cuoi_0285, meme_cuoi_0286, meme_cuoi_0287,
-    meme_cuoi_0288, meme_cuoi_0289, meme_cuoi_0290, meme_cuoi_0291, meme_cuoi_0292, meme_cuoi_0293, meme_cuoi_0294,
-    meme_cuoi_0295, meme_cuoi_0296, meme_cuoi_0297, meme_cuoi_0298
+    meme_cuoi_0057, meme_cuoi_0058, meme_cuoi_0059, meme_cuoi_0060
 };
 
 // '0001', 128x64px
@@ -26557,7 +26523,7 @@ const unsigned char throw_computer_0142[] = {
 };
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in = 147680)
-const unsigned char *throw_computer_video[142] = {
+const unsigned char *throw_computer_video[60] = {
     throw_computer_0001, throw_computer_0002, throw_computer_0003, throw_computer_0004, throw_computer_0005, throw_computer_0006,
     throw_computer_0007, throw_computer_0008, throw_computer_0009, throw_computer_0010, throw_computer_0011, throw_computer_0012,
     throw_computer_0013, throw_computer_0014, throw_computer_0015, throw_computer_0016, throw_computer_0017, throw_computer_0018,
@@ -26568,20 +26534,6 @@ const unsigned char *throw_computer_video[142] = {
     throw_computer_0043, throw_computer_0044, throw_computer_0045, throw_computer_0046, throw_computer_0047, throw_computer_0048,
     throw_computer_0049, throw_computer_0050, throw_computer_0051, throw_computer_0052, throw_computer_0053, throw_computer_0054,
     throw_computer_0055, throw_computer_0056, throw_computer_0057, throw_computer_0058, throw_computer_0059, throw_computer_0060,
-    throw_computer_0061, throw_computer_0062, throw_computer_0063, throw_computer_0064, throw_computer_0065, throw_computer_0066,
-    throw_computer_0067, throw_computer_0068, throw_computer_0069, throw_computer_0070, throw_computer_0071, throw_computer_0072,
-    throw_computer_0073, throw_computer_0074, throw_computer_0075, throw_computer_0076, throw_computer_0077, throw_computer_0078,
-    throw_computer_0079, throw_computer_0080, throw_computer_0081, throw_computer_0082, throw_computer_0083, throw_computer_0084,
-    throw_computer_0085, throw_computer_0086, throw_computer_0087, throw_computer_0088, throw_computer_0089, throw_computer_0090,
-    throw_computer_0091, throw_computer_0092, throw_computer_0093, throw_computer_0094, throw_computer_0095, throw_computer_0096,
-    throw_computer_0097, throw_computer_0098, throw_computer_0099, throw_computer_0100, throw_computer_0101, throw_computer_0102,
-    throw_computer_0103, throw_computer_0104, throw_computer_0105, throw_computer_0106, throw_computer_0107, throw_computer_0108,
-    throw_computer_0109, throw_computer_0110, throw_computer_0111, throw_computer_0112, throw_computer_0113, throw_computer_0114,
-    throw_computer_0115, throw_computer_0116, throw_computer_0117, throw_computer_0118, throw_computer_0119, throw_computer_0120,
-    throw_computer_0121, throw_computer_0122, throw_computer_0123, throw_computer_0124, throw_computer_0125, throw_computer_0126,
-    throw_computer_0127, throw_computer_0128, throw_computer_0129, throw_computer_0130, throw_computer_0131, throw_computer_0132,
-    throw_computer_0133, throw_computer_0134, throw_computer_0135, throw_computer_0136, throw_computer_0137, throw_computer_0138,
-    throw_computer_0139, throw_computer_0140, throw_computer_0141, throw_computer_0142
 };
 
 /* Private variables -------------------------------------------------- */

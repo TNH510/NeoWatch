@@ -28,6 +28,8 @@ base_status_t bsp_lcd_init(void);
  * @param epoch_time
  */
 void bsp_lcd_clock_display(void);
+
+void bsp_lcd_demo_video(uint8_t video_num);
 /* Public enumerate/structure ----------------------------------------- */
 /* Public macros ------------------------------------------------------ */
 /* Public variables --------------------------------------------------- */

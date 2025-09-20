@@ -1,9 +1,6 @@
 idf_component_register(SRCS "main.c"
 
-                    INCLUDE_DIRS "."
-                    REQUIRES
-                        "masuidrive__nimble-nordic-uart"
-                      )
+                    INCLUDE_DIRS ".")
 
 include_directories(${CMAKE_SOURCE_DIR}/source/inc/bsp)
 include_directories(${CMAKE_SOURCE_DIR}/source/inc/common)

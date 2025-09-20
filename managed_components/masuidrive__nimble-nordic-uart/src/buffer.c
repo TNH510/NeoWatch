@@ -23,22 +23,22 @@ esp_err_t _nordic_uart_send_line_buf_to_ring_buf() {
 
 esp_err_t _nordic_uart_linebuf_append(char c) {
   // In ra mỗi ký tự nhận được với mã ASCII của nó
-  printf("Received char: '%c' (ASCII: %u)\n", c, (unsigned int)(unsigned char)c);
+  // printf("Received char: '%c' (ASCII: %u)\n", c, (unsigned int)(unsigned char)c);
   
   switch (c) {
   // break \003 == Ctrl-c
-  case '\003':
-    _nordic_uart_rx_line_buf[0] = '\003';
-    _nordic_uart_rx_line_buf_pos = 1;
-    if (_nordic_uart_send_line_buf_to_ring_buf() != ESP_OK) {
-      ESP_LOGE(_TAG, "Failed to send item");
-      return ESP_FAIL;
-    }
-    break;
+  // case '\003':
+  //   _nordic_uart_rx_line_buf[0] = '\003';
+  //   _nordic_uart_rx_line_buf_pos = 1;
+  //   if (_nordic_uart_send_line_buf_to_ring_buf() != ESP_OK) {
+  //     ESP_LOGE(_TAG, "Failed to send item");
+  //     return ESP_FAIL;
+  //   }
+  //   break;
 
-  // skip \r
-  case '\r':
-    break;
+  // // skip \r
+  // case '\r':
+  //   break;
 
   // send a line buffer to ring buffer
   case '\n':

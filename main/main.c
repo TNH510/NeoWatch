@@ -1,3 +1,4 @@
+
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/ringbuf.h"
@@ -21,14 +22,21 @@ void echoTask(void *parameter)
 
             if (item)
             {
-                // Print each byte of received data as unsigned integer
-                printf("Received %d bytes: ", item_size);
-                int i;
-                for (i = 0; i < item_size; ++i)
-                {
-                    printf("%u ", (unsigned int) (unsigned char) item[i]);
-                }
-                printf("\n");
+                // Tạo bản sao tạm thời của dữ liệu nhận được để in dạng string
+                memcpy(mbuf, item, item_size);
+                mbuf[item_size] = '\0'; // Thêm ký tự null để kết thúc chuỗi
+                
+                // In dữ liệu dạng chuỗi string
+                printf("Received %d bytes: \"%s\"\n", item_size, mbuf);
+                
+                // // Nếu muốn vẫn xem dữ liệu dạng hex, có thể giữ lại dòng này
+                // printf("Hex: ");
+                // int i;
+                // for (i = 0; i < item_size; ++i)
+                // {
+                //     printf("%02X ", (unsigned char) item[i]);
+                // }
+                // printf("\n");
 
                 vRingbufferReturnItem(nordic_uart_rx_buf_handle, (void *) item);
             }

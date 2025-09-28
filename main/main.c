@@ -7,6 +7,7 @@
 #include "base_type.h"
 #include "bsp_i2c.h"
 #include "bsp_lcd.h"
+#include "bsp_rtc.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -69,7 +70,19 @@ void echoTask(void *parameter)
 
 void app_main(void)
 {
-    bsp_lcd_init();
-    nordic_uart_start("Nordic UART", NULL);
-    xTaskCreate(echoTask, "echoTask", 5000, NULL, 1, NULL);
+    // bsp_lcd_init();
+    // nordic_uart_start("Nordic UART", NULL);
+    // xTaskCreate(echoTask, "echoTask", 5000, NULL, 1, NULL);
+    bsp_rtc_init();
+
+    while (1)
+    {
+        char time_str[14];
+        bsp_rtc_string_timestyle(time_str, bsp_rtc_get_time(), ':');
+        printf("%s\r\n", time_str);
+
+        // Printf epoch time for debugging
+        printf("Epoch time: %u\r\n", (unsigned int) bsp_rtc_get_time());
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
 }

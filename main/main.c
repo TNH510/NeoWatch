@@ -7,7 +7,11 @@
 #include "base_type.h"
 #include "bsp_i2c.h"
 #include "bsp_lcd.h"
+<<<<<<< HEAD
 #include "system_display.h"
+=======
+#include "bsp_rtc.h"
+>>>>>>> origin/13-display-current-time-on-screen
 
 #include <stdint.h>
 #include <stdio.h>

@@ -13,7 +13,7 @@
 
 #include "driver/i2c_master.h"
 #include "esp_lcd_panel_io.h"
-#include "esp_lcd_panel_ops.h"
+// #include "esp_lcd_panel_ops.h"
 #include "esp_lcd_panel_vendor.h"
 #include "esp_log.h"
 #include "esp_timer.h"
@@ -56,6 +56,8 @@ static esp_lcd_panel_io_handle_t io_handle    = NULL;
 static esp_lcd_panel_handle_t    panel_handle = NULL;
 // To use LV_COLOR_FORMAT_I1, we need an extra buffer to hold the converted data
 static uint8_t oled_buffer[LCD_H_RES * LCD_V_RES / 8];
+static uint8_t current_display[LCD_H_RES * LCD_V_RES / 8];
+static 
 // LVGL library is not thread-safe, this example will call LVGL APIs from different tasks, so use a mutex to
 // protect it
 static _lock_t lvgl_api_lock;
@@ -68,6 +70,18 @@ static uint8_t current_video = 0xFF; // 0xFF nghĩa là không có video nào đ
 // create a lvgl display
 lv_display_t *display;
 
+base_status_t bsp_lcd_clock_set_mode(bsp_lcd_clock_t mode)
+{
+    if (mode >= BSP_LCD_CLOCK_TYPE_MAX)
+    {
+        return BS_ERROR;
+    }
+
+    if (mode == BSP_LCD_CLOCK_TYPE_LEFT)
+    {
+        
+    }
+}
 /* Private function prototypes ---------------------------------------- */
 /**
  * @brief init I2C for LCD
@@ -204,6 +218,14 @@ static void convert_horiz_msb_to_ssd1306(const uint8_t *src, uint8_t *dst, int w
     }
 }
 
+static void m_display_update(void)
+{
+    // Chuyển đổi dữ liệu frame sang định dạng SSD1306
+    convert_horiz_msb_to_ssd1306(current_display, oled_buffer, LCD_H_RES, LCD_V_RES);
+    // Vẽ frame lên màn hình
+    esp_lcd_panel_draw_bitmap(panel_handle, 0, 0, LCD_H_RES, LCD_V_RES, oled_buffer);
+}
+
 base_status_t bsp_lcd_init(void)
 {
     ESP_LOGI(TAG, "Initialize I2C bus");
@@ -224,19 +246,11 @@ static void m_increase_lvgl_tick(void *arg)
     lv_tick_inc(LVGL_TICK_PERIOD_MS);
 }
 
-void bsp_lcd_clock_display(void)
+void bsp_lcd_clock_display(time_t)
 {
-    ESP_LOGI(TAG, "Display LVGL Scroll Text");
-    // Lock the mutex due to the LVGL APIs are not thread-safe
-    _lock_acquire(&lvgl_api_lock);
-    lv_obj_t *scr   = lv_display_get_screen_active(display);
-    lv_obj_t *label = lv_label_create(scr);
-    lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR); /* Circular scroll */
-    lv_label_set_text(label, "Hello Thach, Hello Hieu.");
-    /* Size of the screen (if you use rotation 90 or 270, please use lv_display_get_vertical_resolution) */
-    lv_obj_set_width(label, lv_display_get_horizontal_resolution(display));
-    lv_obj_align(label, LV_ALIGN_TOP_MID, 0, 0);
-    _lock_release(&lvgl_api_lock);
+    static int i = 0;
+
+    m_display_update();
 }
 
 void bsp_lcd_demo_video(uint8_t video_num)

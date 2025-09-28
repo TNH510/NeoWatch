@@ -16,6 +16,16 @@
 /* Includes ----------------------------------------------------------- */
 #include "base_type.h"
 /* Public defines ----------------------------------------------------- */
+/* Public enumerate/structure ----------------------------------------- */
+typedef enum
+{
+    BSP_LCD_CLOCK_TYPE_LEFT,
+    BSP_LCD_CLOCK_TYPE_RIGHT,
+    BSP_LCD_CLOCK_TYPE_MAX,
+} bsp_lcd_clock_t;
+/* Public macros ------------------------------------------------------ */
+/* Public variables --------------------------------------------------- */
+/* Public function prototypes ----------------------------------------- */
 /**
  * @brief
  *
@@ -25,16 +35,22 @@ base_status_t bsp_lcd_init(void);
 /**
  * @brief Function to display clock
  *
- * @param epoch_time
+ * @param 
  */
 void bsp_lcd_clock_display(void);
-
+/**
+ * @brief 
+ * 
+ * @param video_num 
+ */
 void bsp_lcd_demo_video(uint8_t video_num);
-/* Public enumerate/structure ----------------------------------------- */
-/* Public macros ------------------------------------------------------ */
-/* Public variables --------------------------------------------------- */
-/* Public function prototypes ----------------------------------------- */
-
+/**
+ * @brief 
+ * 
+ * @param mode 
+ * @return base_status_t 
+ */
+base_status_t bsp_lcd_clock_set_mode(bsp_lcd_clock_t mode);
 /* -------------------------------------------------------------------- */
 #endif /* __BSP_LCD_H */
 

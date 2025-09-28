@@ -7,6 +7,7 @@
 #include "base_type.h"
 #include "bsp_i2c.h"
 #include "bsp_lcd.h"
+#include "system_display.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -69,7 +70,10 @@ void echoTask(void *parameter)
 
 void app_main(void)
 {
-    bsp_lcd_init();
-    nordic_uart_start("Nordic UART", NULL);
-    xTaskCreate(echoTask, "echoTask", 5000, NULL, 1, NULL);
+    system_display_init();
+
+    while(1)
+    {
+        system_display_clock();
+    }
 }

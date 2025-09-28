@@ -37,7 +37,7 @@ base_status_t bsp_lcd_init(void);
  *
  * @param 
  */
-void bsp_lcd_clock_display(void);
+void bsp_lcd_clock_display(uint16_t year, uint8_t month, uint16_t day, uint8_t hour, uint8_t min, uint8_t sec);
 /**
  * @brief 
  * 

@@ -13,12 +13,13 @@
 
 #include "driver/i2c_master.h"
 #include "esp_lcd_panel_io.h"
-// #include "esp_lcd_panel_ops.h"
+#include "esp_lcd_panel_ops.h"
 #include "esp_lcd_panel_vendor.h"
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "lvgl.h"
 #include "video_frame.h"
+#include "bsp_rtc.h"
 
 #include <esp_heap_caps.h>
 #include <sys/lock.h>
@@ -69,6 +70,8 @@ static uint8_t current_video = 0xFF; // 0xFF nghĩa là không có video nào đ
 
 // create a lvgl display
 lv_display_t *display;
+// Static label object to reuse for clock display
+static lv_obj_t *s_clock_label = NULL;
 
 base_status_t bsp_lcd_clock_set_mode(bsp_lcd_clock_t mode)
 {
@@ -229,10 +232,11 @@ base_status_t bsp_lcd_init(void)
     CHECK_STATUS(m_i2c_init());
     CHECK_STATUS(m_panel_init());
     CHECK_STATUS(m_driver_ssd1306_init());
+    m_graphic_init();
 
-    memset(oled_buffer, 0x00, sizeof(oled_buffer));
-    esp_lcd_panel_draw_bitmap(panel_handle, 0, 0, LCD_H_RES, LCD_V_RES, oled_buffer);
-    esp_lcd_panel_invert_color(panel_handle, false);
+    // memset(oled_buffer, 0x00, sizeof(oled_buffer));
+    // esp_lcd_panel_draw_bitmap(panel_handle, 0, 0, LCD_H_RES, LCD_V_RES, oled_buffer);
+    // esp_lcd_panel_invert_color(panel_handle, false);
 
     return BS_OK;
 }
@@ -243,11 +247,41 @@ static void m_increase_lvgl_tick(void *arg)
     lv_tick_inc(LVGL_TICK_PERIOD_MS);
 }
 
-void bsp_lcd_clock_display(time_t)
+void bsp_lcd_clock_display(uint16_t year, uint8_t month, uint16_t day, uint8_t hour, uint8_t min, uint8_t sec)
 {
-    static int i = 0;
+    // Lock the mutex due to the LVGL APIs are not thread-safe
+    _lock_acquire(&lvgl_api_lock);
+    
+    lv_obj_t *scr = lv_display_get_screen_active(display);
+    if (scr == NULL) {
+        _lock_release(&lvgl_api_lock);
+        return;
+    }
+    
+    // Clear previous label if screen changed or first time initialization
+    if (s_clock_label != NULL && lv_obj_get_parent(s_clock_label) != scr) {
+        lv_obj_del(s_clock_label);
+        s_clock_label = NULL;
+    }
+    
+    // Create label only if it doesn't exist yet
+    if (s_clock_label == NULL) {
+        s_clock_label = lv_label_create(scr);
+        // lv_label_set_long_mode(s_clock_label, LV_LABEL_LONG_SCROLL_CIRCULAR); /* Circular scroll */
+        
+        /* Size of the screen (if you use rotation 90 or 270, please use lv_display_get_vertical_resolution) */
+        lv_obj_set_width(s_clock_label, lv_display_get_horizontal_resolution(display));
+        lv_obj_align(s_clock_label, LV_ALIGN_TOP_MID, 0, 0);
+    }
 
-    m_display_update();
+    // Update time text on the existing label
+    char time_str[14];
+    bsp_rtc_string_timestyle(time_str, bsp_rtc_get_time(), ':');
+    lv_label_set_text(s_clock_label, time_str);
+    
+    _lock_release(&lvgl_api_lock);
+
+    // m_display_update();
 }
 
 void bsp_lcd_demo_video(uint8_t video_num)

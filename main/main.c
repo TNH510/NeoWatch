@@ -15,6 +15,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+// Function prototypes
+void echoTask(void *parameter);
+void display_clock_task(void *pvParameters);
+
 void echoTask(void *parameter)
 {
     static char mbuf[CONFIG_NORDIC_UART_MAX_LINE_LENGTH + 1];
@@ -72,9 +76,25 @@ void echoTask(void *parameter)
 void app_main(void)
 {
     system_display_init();
+    
+    // Create a task for the display clock to run in background
+    xTaskCreate(display_clock_task, "display_clock", 2048, NULL, 5, NULL);
+    
+    // Initialize Bluetooth if needed
+    // nimble_nordic_uart_init();
+    
+    // Create echo task for BLE
+    // xTaskCreate(echoTask, "echoTask", 4096, NULL, 5, NULL);
+    
+    // Main task can exit now - FreeRTOS scheduler will take over
+}
 
-    while(1)
+// Separate task for display clock
+void display_clock_task(void *pvParameters)
+{
+    while (1)
     {
         system_display_clock();
+        // Task delay already in system_display_clock()
     }
 }

@@ -12,6 +12,7 @@
 #include "system_display.h"
 #include "bsp_lcd.h"
 #include "esp_timer.h"
+#include "bsp_rtc.h"
 
 /* Private defines ---------------------------------------------------- */
 /* Private enumerate/structure ---------------------------------------- */
@@ -24,20 +25,25 @@
 void system_display_init(void)
 {
     bsp_lcd_init();
+    bsp_rtc_init();
     // bsp_lcd_clock_set_mode();
 }
 
 void system_display_clock(void)
 {
-    static uint32_t tick_start = 0;
+    static int64_t tick_start = 0;
+    int64_t now = esp_timer_get_time();
 
-    if ((esp_timer_get_time() - tick_start) > 1000000)
+    if ((now - tick_start) > 1000000) // 1 second interval
     {
-        tick_start = esp_timer_get_time();
+        tick_start = now;
 
         // Call bsp lcd display clock function
-        bsp_lcd_clock_display();
+        bsp_lcd_clock_display(1, 1, 1, 1, 1, 1);
     }
+    
+    // Add a small delay to prevent watchdog timeout
+    vTaskDelay(1); // Yield to other tasks
 }
 
 /* End of file -------------------------------------------------------- */

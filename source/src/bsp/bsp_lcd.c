@@ -57,7 +57,7 @@ static esp_lcd_panel_handle_t    panel_handle = NULL;
 // To use LV_COLOR_FORMAT_I1, we need an extra buffer to hold the converted data
 static uint8_t oled_buffer[LCD_H_RES * LCD_V_RES / 8];
 static uint8_t current_display[LCD_H_RES * LCD_V_RES / 8];
-static 
+ 
 // LVGL library is not thread-safe, this example will call LVGL APIs from different tasks, so use a mutex to
 // protect it
 static _lock_t lvgl_api_lock;
@@ -77,10 +77,7 @@ base_status_t bsp_lcd_clock_set_mode(bsp_lcd_clock_t mode)
         return BS_ERROR;
     }
 
-    if (mode == BSP_LCD_CLOCK_TYPE_LEFT)
-    {
-        
-    }
+    return BS_OK;
 }
 /* Private function prototypes ---------------------------------------- */
 /**

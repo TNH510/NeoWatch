@@ -24,7 +24,7 @@
 void system_display_init(void)
 {
     bsp_lcd_init();
-    bsp_lcd_clock_set_mode();
+    // bsp_lcd_clock_set_mode();
 }
 
 void system_display_clock(void)

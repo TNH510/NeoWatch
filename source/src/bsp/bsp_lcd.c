@@ -383,6 +383,7 @@ static base_status_t m_driver_ssd1306_init(void)
     CHECK_ESP_STATUS(esp_lcd_panel_reset(panel_handle));
     CHECK_ESP_STATUS(esp_lcd_panel_init(panel_handle));
     CHECK_ESP_STATUS(esp_lcd_panel_disp_on_off(panel_handle, true));
+    CHECK_ESP_STATUS(esp_lcd_panel_mirror(panel_handle, true, true));
     ESP_LOGI(TAG, "Installed SSD1306 panel driver success");
     return BS_OK;
 }

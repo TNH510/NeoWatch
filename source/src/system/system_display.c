@@ -31,19 +31,19 @@ void system_display_init(void)
 
 void system_display_clock(void)
 {
-    static int64_t tick_start = 0;
-    int64_t now = esp_timer_get_time();
+    // static int64_t tick_start = 0;
+    // int64_t now = esp_timer_get_time();
 
-    if ((now - tick_start) > 1000000) // 1 second interval
-    {
-        tick_start = now;
+    // if ((now - tick_start) > 1000000) // 1 second interval
+    // {
+    //     tick_start = now;
 
-        // Call bsp lcd display clock function
+    //     // Call bsp lcd display clock function
         bsp_lcd_clock_display(1, 1, 1, 1, 1, 1);
-    }
+    // }
     
     // Add a small delay to prevent watchdog timeout
-    vTaskDelay(1); // Yield to other tasks
+    vTaskDelay(1000); // Yield to other tasks
 }
 
 /* End of file -------------------------------------------------------- */

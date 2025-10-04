@@ -79,6 +79,12 @@ void app_main(void)
     
     // Create a task for the display clock to run in background
     xTaskCreate(display_clock_task, "display_clock", 2048, NULL, 5, NULL);
+
+    while (1)
+    {
+        vTaskDelay(pdMS_TO_TICKS(100)); // Nhường CPU mỗi 100ms
+    }
+    
     
     // Initialize Bluetooth if needed
     // nimble_nordic_uart_init();

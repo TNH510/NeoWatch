@@ -5,8 +5,12 @@
 
 #include "ui.h"
 
+lv_obj_t * uic_Button1;
 lv_obj_t * ui_Screen1 = NULL;
 lv_obj_t * ui_Image1 = NULL;
+lv_obj_t * ui_Image2 = NULL;
+lv_obj_t * ui_Button1 = NULL;
+lv_obj_t * ui_Label3 = NULL;
 // event funtions
 
 // build funtions
@@ -17,14 +21,52 @@ void ui_Screen1_screen_init(void)
     lv_obj_remove_flag(ui_Screen1, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
     ui_Image1 = lv_image_create(ui_Screen1);
-    lv_image_set_src(ui_Image1, &ui_img_cat_mini_png);
+    lv_image_set_src(ui_Image1, &ui_img_snake_game_start_png);
     lv_obj_set_width(ui_Image1, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Image1, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Image1, -2);
-    lv_obj_set_y(ui_Image1, -1);
+    lv_obj_set_x(ui_Image1, -39);
+    lv_obj_set_y(ui_Image1, 7);
     lv_obj_set_align(ui_Image1, LV_ALIGN_CENTER);
     lv_obj_add_flag(ui_Image1, LV_OBJ_FLAG_CLICKABLE);     /// Flags
     lv_obj_remove_flag(ui_Image1, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_image_set_scale(ui_Image1, 220);
+
+    ui_Image2 = lv_image_create(ui_Screen1);
+    lv_image_set_src(ui_Image2, &ui_img_snake_game_logo_png);
+    lv_obj_set_width(ui_Image2, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Image2, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Image2, 2);
+    lv_obj_set_y(ui_Image2, -25);
+    lv_obj_set_align(ui_Image2, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_Image2, LV_OBJ_FLAG_CLICKABLE);     /// Flags
+    lv_obj_remove_flag(ui_Image2, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_image_set_scale(ui_Image2, 250);
+
+    ui_Button1 = lv_button_create(ui_Screen1);
+    lv_obj_set_width(ui_Button1, 57);
+    lv_obj_set_height(ui_Button1, 19);
+    lv_obj_set_x(ui_Button1, 23);
+    lv_obj_set_y(ui_Button1, 4);
+    lv_obj_set_align(ui_Button1, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_Button1, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_remove_flag(ui_Button1, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_Button1, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_Button1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_Button1, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(ui_Button1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_Button1, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Label3 = lv_label_create(ui_Screen1);
+    lv_obj_set_width(ui_Label3, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label3, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Label3, 22);
+    lv_obj_set_y(ui_Label3, 4);
+    lv_obj_set_align(ui_Label3, LV_ALIGN_CENTER);
+    lv_label_set_long_mode(ui_Label3, LV_LABEL_LONG_SCROLL);
+    lv_label_set_text(ui_Label3, "Start");
+    lv_obj_set_style_text_font(ui_Label3, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    uic_Button1 = ui_Button1;
 
 }
 
@@ -35,5 +77,9 @@ void ui_Screen1_screen_destroy(void)
     // NULL screen variables
     ui_Screen1 = NULL;
     ui_Image1 = NULL;
+    ui_Image2 = NULL;
+    uic_Button1 = NULL;
+    ui_Button1 = NULL;
+    ui_Label3 = NULL;
 
 }

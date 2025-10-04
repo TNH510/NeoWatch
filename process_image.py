@@ -1,15 +1,15 @@
-def process_image_data(input_file, output_file):
+def process_image_data(input_file, output_file, threshold=0xF0):
     """
     Process LVGL image data from RGBA format to 1-bit monochrome format (LV_COLOR_FORMAT_I1)
     for SSD1306 OLED display.
     
     This function:
     1. Reads the original image C file
-    2. Extracts the RGBA data
-    3. Processes data by keeping only values 3 and 4 from each group of 4 values (R,G,B,A)
-    4. Replaces the original RGBA data array with the new monochrome data
-    5. Updates the image descriptor to use LV_COLOR_FORMAT_I1
-    6. Updates any references to the data array
+    2. Auto-detects and extracts the image data array
+    3. Calculates average of RGB values and compares with threshold
+    4. Converts to binary black/white (0x00 or 0xFF) based on threshold
+    5. Replaces the original RGBA data array with the new monochrome data
+    6. Updates the image descriptor to use LV_COLOR_FORMAT_I1
     
     Args:
         input_file: Path to the input C file with RGBA image data
@@ -21,36 +21,51 @@ def process_image_data(input_file, output_file):
     with open(input_file, 'r') as f:
         content = f.read()
 
-    # Find the RGBA data array (first try with the regular pattern)
-    start_marker = "const LV_ATTRIBUTE_MEM_ALIGN uint8_t ui_img_cat_mini_png_data[] = {"
+    # Extract file base name from the file path
+    import os
+    file_base = os.path.basename(input_file)
+    file_name = os.path.splitext(file_base)[0]  # Remove .c extension
+    
+    # Find the RGBA data array
     end_marker = "};"
+    base_name = None
+    start_marker = None
+    start_pos = -1
     
-    # Extract base name (e.g., "ui_img_cat_mini_png") from the marker
-    base_name = "ui_img_cat_mini_png"  # Default value
+    # First try: standard pattern with filename
+    potential_markers = [
+        f"const LV_ATTRIBUTE_MEM_ALIGN uint8_t {file_name}_data[] = {{",
+        f"const LV_ATTRIBUTE_MEM_ALIGN uint8_t {file_name}_rgba_data[] = {{"
+    ]
     
-    start_pos = content.find(start_marker)
+    # Try each potential marker
+    for marker in potential_markers:
+        pos = content.find(marker)
+        if pos != -1:
+            start_marker = marker
+            start_pos = pos
+            base_name = file_name
+            print(f"Found data array for {base_name}")
+            break
+    
+    # If not found, try to detect any ui_img pattern
     if start_pos == -1:
-        print(f"Could not find data array. Looking for alternative marker...")
+        print("Looking for any ui_img data array...")
+        import re
         
-        # Try with "_rgba_" naming pattern
-        for potential_base in ["ui_img_cat_mini_png", "ui_img_cat_png"]:
-            alt_marker = f"const LV_ATTRIBUTE_MEM_ALIGN uint8_t {potential_base}_data[] = {{"
-            alt_start_pos = content.find(alt_marker)
-            if alt_start_pos != -1:
-                start_marker = alt_marker
-                start_pos = alt_start_pos
-                base_name = potential_base
-                print(f"Found data array for {base_name}")
-                break
+        # Look for any ui_img*_data pattern
+        pattern = r'const\s+LV_ATTRIBUTE_MEM_ALIGN\s+uint8_t\s+(ui_img[^_]+(?:_[^_]+)*)_data\[\]\s*=\s*\{'
+        matches = re.findall(pattern, content)
+        
+        if matches:
+            base_name = matches[0]
+            start_marker = f"const LV_ATTRIBUTE_MEM_ALIGN uint8_t {base_name}_data[] = {{"
+            start_pos = content.find(start_marker)
+            print(f"Auto-detected image data array for {base_name}")
                 
         if start_pos == -1:
-            print(f"Could not find any data array")
+            print(f"Could not find any data array in {input_file}")
             return
-    else:
-        # Extract base name from the found marker
-        marker_parts = start_marker.split("const LV_ATTRIBUTE_MEM_ALIGN uint8_t ")[1].split("_data[] = {")
-        if len(marker_parts) > 0:
-            base_name = marker_parts[0]
     
     start_pos += len(start_marker)
     end_pos = content.find(end_marker, start_pos)
@@ -73,7 +88,7 @@ def process_image_data(input_file, output_file):
     
     # Process data: Calculate average of first 3 values (RGB) and compare with threshold
     # If avg < threshold, use 0x00, else use 0xFF, and generate 2 identical bytes
-    threshold = 0x99  # Default threshold value
+    # Use the threshold parameter passed to the function
     processed_values = []
     
     for i in range(0, len(values), 4):
@@ -121,16 +136,54 @@ def process_image_data(input_file, output_file):
     print(f"Successfully processed and saved to: {output_file}")
     print(f"Image format changed to LV_COLOR_FORMAT_I1 (1-bit monochrome)")
 
+# Function to find all image files in a directory
+def find_image_files(directory):
+    """
+    Find all files starting with ui_img in the specified directory
+    
+    Args:
+        directory: Directory path to search in
+    
+    Returns:
+        List of paths to files starting with ui_img and ending with .c
+    """
+    import os
+    import glob
+    
+    # Get all .c files in the directory
+    pattern = os.path.join(directory, "ui_img*.c")
+    files = glob.glob(pattern)
+    
+    print(f"Found {len(files)} image files in {directory}")
+    return files
+
 # Main execution
 if __name__ == "__main__":
     import sys
+    import os
+    
     if len(sys.argv) > 1:
-        process_image_data(sys.argv[1], sys.argv[1])  # Input and output are the same file
+        # If argument is a directory, process all image files in that directory
+        if os.path.isdir(sys.argv[1]):
+            image_files = find_image_files(sys.argv[1])
+            print(f"Found {len(image_files)} image files to process")
+            for file_path in image_files:
+                try:
+                    process_image_data(file_path, file_path)
+                except Exception as e:
+                    print(f"Error processing {file_path}: {str(e)}")
+        else:
+            # Process single file
+            process_image_data(sys.argv[1], sys.argv[1])
     else:
-        # Default paths if no arguments provided
-        image_files = [
-            "h:\\Learning\\NeoVerse\\neowatch\\ui\\export\\c\\ui_img_cat_mini_png.c",
-        ]
+        # Default directory if no arguments provided
+        default_dir = "h:\\Learning\\NeoVerse\\neowatch\\ui\\export\\c"
+        print(f"Searching for image files in default directory: {default_dir}")
+        
+        image_files = find_image_files(default_dir)
+        
+        if not image_files:
+            print("No image files found. Please check the directory path.")
         
         for file_path in image_files:
             try:

@@ -76,9 +76,10 @@ void echoTask(void *parameter)
 void app_main(void)
 {
     system_display_init();
+    system_display_clock();
     
     // Create a task for the display clock to run in background
-    xTaskCreate(display_clock_task, "display_clock", 2048, NULL, 5, NULL);
+    // xTaskCreate(display_clock_task, "display_clock", 2048, NULL, 5, NULL);
 
     while (1)
     {
@@ -100,7 +101,7 @@ void display_clock_task(void *pvParameters)
 {
     while (1)
     {
-        system_display_clock();
+        // system_display_clock();
         // Task delay already in system_display_clock()
     }
 }

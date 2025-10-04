@@ -75,6 +75,9 @@ lv_display_t *display;
 // Static label object to reuse for clock display
 static lv_obj_t *s_clock_label = NULL;
 
+// Sử dụng một đối tượng hình ảnh thực tế để xoay thay vì ui____initial_actions0
+static lv_obj_t *img_obj;
+
 base_status_t bsp_lcd_clock_set_mode(bsp_lcd_clock_t mode)
 {
     if (mode >= BSP_LCD_CLOCK_TYPE_MAX)
@@ -287,55 +290,45 @@ void bsp_lcd_clock_display(uint16_t year, uint8_t month, uint16_t day, uint8_t h
     // lv_label_set_text(s_clock_label, time_str);
 
     ui_init();
+    // snakeWelcome_Animation(ui____initial_actions0, 100);
     _lock_release(&lvgl_api_lock);
 
+    // Sử dụng một đối tượng hình ảnh thực tế để xoay thay vì ui____initial_actions0
+    img_obj = lv_img_create(lv_scr_act());
+
+    // Thiết lập hình ảnh và thuộc tính
+    lv_image_set_src(img_obj, &ui_img_snake_game_start_png);
+    lv_obj_set_width(img_obj, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(img_obj, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(img_obj, -39);
+    lv_obj_set_y(img_obj, 7);
+    lv_obj_set_align(img_obj, LV_ALIGN_CENTER);
+    lv_obj_add_flag(img_obj, LV_OBJ_FLAG_CLICKABLE);     /// Flags
+    lv_obj_remove_flag(img_obj, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_image_set_scale(img_obj, 220);
     // m_display_update();
 }
 
 void bsp_lcd_demo_video(uint8_t video_num)
 {
-    if (video_num >= 3)
-    {
-        return;
-    }
+    // _lock_acquire(&lvgl_api_lock);
     
-    // Kiểm tra và dừng task đang chạy nếu có
-    if (animation_running && animation_task_handle != NULL)
-    {
-        // Đánh dấu để task dừng vòng lặp animation
-        animation_running = false;
-        
-        // Đợi một khoảng thời gian ngắn để task kết thúc vòng lặp hiện tại
-        vTaskDelay(pdMS_TO_TICKS(30));
-        
-        // Xóa task trước đó nếu nó chưa tự xóa
-        if (animation_task_handle != NULL)
+    // // Kiểm tra và xóa ảnh cũ nếu có
+    // if (img_obj != NULL) {
+    //     lv_obj_del(img_obj);
+    //     img_obj = NULL;
+    // }
+    
+    if (img_obj != NULL) 
         {
-            vTaskDelete(animation_task_handle);
-            animation_task_handle = NULL;
-            ESP_LOGI(TAG, "Previous animation task stopped");
-        }
+        // Áp dụng animation cho đối tượng hình ảnh, giới hạn số lần lặp
+        lv_anim_t *anim = snakeWelcome_Animation(img_obj, 100);
+        vTaskDelay(pdMS_TO_TICKS(300));
+    } else {
+        ESP_LOGE(TAG, "Failed to create image object");
     }
     
-    // Tạo task mới cho video được chọn
-    if (video_num == 0)
-    {
-        // Tạo task chạy animation thay vì dùng vòng lặp for
-        animation_running = true;
-        xTaskCreate(m_animation_task_1, "anim_task", 2048, NULL, 3, &animation_task_handle);
-    }
-    else if (video_num == 1)
-    {
-        // Tạo task chạy animation thay vì dùng vòng lặp for
-        animation_running = true;
-        xTaskCreate(m_animation_task_2, "anim_task", 2048, NULL, 3, &animation_task_handle);
-    }
-    else if (video_num == 2)
-    {
-        // Tạo task chạy animation thay vì dùng vòng lặp for
-        animation_running = true;
-        xTaskCreate(m_animation_task_3, "anim_task", 2048, NULL, 3, &animation_task_handle);
-    }
+    // _lock_release(&lvgl_api_lock);
 }
 
 static base_status_t m_i2c_init(void)
@@ -402,6 +395,9 @@ static void m_lvgl_port_task(void *arg)
     uint32_t time_till_next_ms = 0;
     while (1)
     {
+        // // Allow other tasks to run before we process LVGL
+        // vTaskDelay(100);
+        
         _lock_acquire(&lvgl_api_lock);
         time_till_next_ms = lv_timer_handler();
         _lock_release(&lvgl_api_lock);

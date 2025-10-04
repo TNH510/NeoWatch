@@ -41,9 +41,12 @@ void system_display_clock(void)
     //     // Call bsp lcd display clock function
         bsp_lcd_clock_display(1, 1, 1, 1, 1, 1);
     // }
+}
+
+void system_display_task(void)
+{
+    bsp_lcd_demo_video(0);
     
-    // Add a small delay to prevent watchdog timeout
-    vTaskDelay(1000); // Yield to other tasks
 }
 
 /* End of file -------------------------------------------------------- */

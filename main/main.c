@@ -83,7 +83,8 @@ void app_main(void)
 
     while (1)
     {
-        vTaskDelay(pdMS_TO_TICKS(100)); // Nhường CPU mỗi 100ms
+        system_display_task();
+        vTaskDelay(pdMS_TO_TICKS(10)); // Nhường CPU mỗi 10ms
     }
     
     
@@ -101,7 +102,6 @@ void display_clock_task(void *pvParameters)
 {
     while (1)
     {
-        // system_display_clock();
-        // Task delay already in system_display_clock()
+        // system_display_task();
     }
 }

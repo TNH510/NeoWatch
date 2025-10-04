@@ -45,6 +45,8 @@ void system_display_init(void);
  */
 void system_display_clock(void);
 
+void system_display_task(void);
+
 /**
  * @brief Display update screen
  *

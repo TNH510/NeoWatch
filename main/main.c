@@ -7,11 +7,17 @@
 #include "base_type.h"
 #include "bsp_i2c.h"
 #include "bsp_lcd.h"
+#include "system_display.h"
+#include "bsp_rtc.h"
 
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
+// Function prototypes
+void echoTask(void *parameter);
+void display_clock_task(void *pvParameters);
 
 void echoTask(void *parameter)
 {
@@ -69,7 +75,33 @@ void echoTask(void *parameter)
 
 void app_main(void)
 {
-    bsp_lcd_init();
-    nordic_uart_start("Nordic UART", NULL);
-    xTaskCreate(echoTask, "echoTask", 5000, NULL, 1, NULL);
+    system_display_init();
+    system_display_clock();
+    
+    // Create a task for the display clock to run in background
+    // xTaskCreate(display_clock_task, "display_clock", 2048, NULL, 5, NULL);
+
+    while (1)
+    {
+        system_display_task();
+        vTaskDelay(pdMS_TO_TICKS(10)); // Nhường CPU mỗi 10ms
+    }
+    
+    
+    // Initialize Bluetooth if needed
+    // nimble_nordic_uart_init();
+    
+    // Create echo task for BLE
+    // xTaskCreate(echoTask, "echoTask", 4096, NULL, 5, NULL);
+    
+    // Main task can exit now - FreeRTOS scheduler will take over
+}
+
+// Separate task for display clock
+void display_clock_task(void *pvParameters)
+{
+    while (1)
+    {
+        // system_display_task();
+    }
 }

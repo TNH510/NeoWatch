@@ -19,10 +19,13 @@
 #include "esp_timer.h"
 #include "lvgl.h"
 #include "video_frame.h"
+#include "bsp_rtc.h"
 
 #include <esp_heap_caps.h>
 #include <sys/lock.h>
 #include <unistd.h>
+
+#include "ui.h"
 
 static const char *TAG = "BSP_LCD";
 
@@ -56,6 +59,8 @@ static esp_lcd_panel_io_handle_t io_handle    = NULL;
 static esp_lcd_panel_handle_t    panel_handle = NULL;
 // To use LV_COLOR_FORMAT_I1, we need an extra buffer to hold the converted data
 static uint8_t oled_buffer[LCD_H_RES * LCD_V_RES / 8];
+static uint8_t current_display[LCD_H_RES * LCD_V_RES / 8];
+ 
 // LVGL library is not thread-safe, this example will call LVGL APIs from different tasks, so use a mutex to
 // protect it
 static _lock_t lvgl_api_lock;
@@ -67,7 +72,21 @@ static uint8_t current_video = 0xFF; // 0xFF nghĩa là không có video nào đ
 
 // create a lvgl display
 lv_display_t *display;
+// Static label object to reuse for clock display
+static lv_obj_t *s_clock_label = NULL;
 
+// Sử dụng một đối tượng hình ảnh thực tế để xoay thay vì ui____initial_actions0
+static lv_obj_t *img_obj;
+
+base_status_t bsp_lcd_clock_set_mode(bsp_lcd_clock_t mode)
+{
+    if (mode >= BSP_LCD_CLOCK_TYPE_MAX)
+    {
+        return BS_ERROR;
+    }
+
+    return BS_OK;
+}
 /* Private function prototypes ---------------------------------------- */
 /**
  * @brief init I2C for LCD
@@ -204,16 +223,27 @@ static void convert_horiz_msb_to_ssd1306(const uint8_t *src, uint8_t *dst, int w
     }
 }
 
+static void m_display_update(void)
+{
+    // Chuyển đổi dữ liệu frame sang định dạng SSD1306
+    convert_horiz_msb_to_ssd1306(current_display, oled_buffer, LCD_H_RES, LCD_V_RES);
+    // Vẽ frame lên màn hình
+    esp_lcd_panel_draw_bitmap(panel_handle, 0, 0, LCD_H_RES, LCD_V_RES, oled_buffer);
+}
+
 base_status_t bsp_lcd_init(void)
 {
     ESP_LOGI(TAG, "Initialize I2C bus");
     CHECK_STATUS(m_i2c_init());
     CHECK_STATUS(m_panel_init());
     CHECK_STATUS(m_driver_ssd1306_init());
+    m_graphic_init();
 
-    memset(oled_buffer, 0x00, sizeof(oled_buffer));
-    esp_lcd_panel_draw_bitmap(panel_handle, 0, 0, LCD_H_RES, LCD_V_RES, oled_buffer);
-    esp_lcd_panel_invert_color(panel_handle, false);
+    // ui_init();
+
+    // memset(oled_buffer, 0x00, sizeof(oled_buffer));
+    // esp_lcd_panel_draw_bitmap(panel_handle, 0, 0, LCD_H_RES, LCD_V_RES, oled_buffer);
+    // esp_lcd_panel_invert_color(panel_handle, false);
 
     return BS_OK;
 }
@@ -224,65 +254,81 @@ static void m_increase_lvgl_tick(void *arg)
     lv_tick_inc(LVGL_TICK_PERIOD_MS);
 }
 
-void bsp_lcd_clock_display(void)
+void bsp_lcd_clock_display(uint16_t year, uint8_t month, uint16_t day, uint8_t hour, uint8_t min, uint8_t sec)
 {
-    ESP_LOGI(TAG, "Display LVGL Scroll Text");
     // Lock the mutex due to the LVGL APIs are not thread-safe
     _lock_acquire(&lvgl_api_lock);
-    lv_obj_t *scr   = lv_display_get_screen_active(display);
-    lv_obj_t *label = lv_label_create(scr);
-    lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR); /* Circular scroll */
-    lv_label_set_text(label, "Hello Thach, Hello Hieu.");
-    /* Size of the screen (if you use rotation 90 or 270, please use lv_display_get_vertical_resolution) */
-    lv_obj_set_width(label, lv_display_get_horizontal_resolution(display));
-    lv_obj_align(label, LV_ALIGN_TOP_MID, 0, 0);
+    
+    lv_obj_t *scr = lv_display_get_screen_active(display);
+    if (scr == NULL) {
+        _lock_release(&lvgl_api_lock);
+        return;
+    }
+
+    // // Clear previous label if screen changed or first time initialization
+    // if (s_clock_label != NULL && lv_obj_get_parent(s_clock_label) != scr)
+    // {
+    //     lv_obj_del(s_clock_label);
+    //     s_clock_label = NULL;
+    // }
+
+    // // Create label only if it doesn't exist yet
+    // if (s_clock_label == NULL)
+    // {
+    //     s_clock_label = lv_label_create(scr);
+    //     // lv_label_set_long_mode(s_clock_label, LV_LABEL_LONG_SCROLL_CIRCULAR); /* Circular scroll */
+
+    //     /* Size of the screen (if you use rotation 90 or 270, please use lv_display_get_vertical_resolution)
+    //      */
+    //     lv_obj_set_width(s_clock_label, lv_display_get_horizontal_resolution(display));
+    //     lv_obj_align(s_clock_label, LV_ALIGN_TOP_MID, 0, 0);
+    // }
+
+    // // Update time text on the existing label
+    // char time_str[14];
+    // bsp_rtc_string_timestyle(time_str, bsp_rtc_get_time(), ':');
+    // lv_label_set_text(s_clock_label, time_str);
+
+    ui_init();
+    // snakeWelcome_Animation(ui____initial_actions0, 100);
     _lock_release(&lvgl_api_lock);
+
+    // Sử dụng một đối tượng hình ảnh thực tế để xoay thay vì ui____initial_actions0
+    img_obj = lv_img_create(lv_scr_act());
+
+    // Thiết lập hình ảnh và thuộc tính
+    lv_image_set_src(img_obj, &ui_img_snake_game_start_png);
+    lv_obj_set_width(img_obj, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(img_obj, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(img_obj, -39);
+    lv_obj_set_y(img_obj, 7);
+    lv_obj_set_align(img_obj, LV_ALIGN_CENTER);
+    lv_obj_add_flag(img_obj, LV_OBJ_FLAG_CLICKABLE);     /// Flags
+    lv_obj_remove_flag(img_obj, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_image_set_scale(img_obj, 220);
+    // m_display_update();
 }
 
 void bsp_lcd_demo_video(uint8_t video_num)
 {
-    if (video_num >= 3)
-    {
-        return;
-    }
+    // _lock_acquire(&lvgl_api_lock);
     
-    // Kiểm tra và dừng task đang chạy nếu có
-    if (animation_running && animation_task_handle != NULL)
-    {
-        // Đánh dấu để task dừng vòng lặp animation
-        animation_running = false;
-        
-        // Đợi một khoảng thời gian ngắn để task kết thúc vòng lặp hiện tại
-        vTaskDelay(pdMS_TO_TICKS(30));
-        
-        // Xóa task trước đó nếu nó chưa tự xóa
-        if (animation_task_handle != NULL)
+    // // Kiểm tra và xóa ảnh cũ nếu có
+    // if (img_obj != NULL) {
+    //     lv_obj_del(img_obj);
+    //     img_obj = NULL;
+    // }
+    
+    if (img_obj != NULL) 
         {
-            vTaskDelete(animation_task_handle);
-            animation_task_handle = NULL;
-            ESP_LOGI(TAG, "Previous animation task stopped");
-        }
+        // Áp dụng animation cho đối tượng hình ảnh, giới hạn số lần lặp
+        lv_anim_t *anim = snakeWelcome_Animation(img_obj, 100);
+        vTaskDelay(pdMS_TO_TICKS(300));
+    } else {
+        ESP_LOGE(TAG, "Failed to create image object");
     }
     
-    // Tạo task mới cho video được chọn
-    if (video_num == 0)
-    {
-        // Tạo task chạy animation thay vì dùng vòng lặp for
-        animation_running = true;
-        xTaskCreate(m_animation_task_1, "anim_task", 2048, NULL, 3, &animation_task_handle);
-    }
-    else if (video_num == 1)
-    {
-        // Tạo task chạy animation thay vì dùng vòng lặp for
-        animation_running = true;
-        xTaskCreate(m_animation_task_2, "anim_task", 2048, NULL, 3, &animation_task_handle);
-    }
-    else if (video_num == 2)
-    {
-        // Tạo task chạy animation thay vì dùng vòng lặp for
-        animation_running = true;
-        xTaskCreate(m_animation_task_3, "anim_task", 2048, NULL, 3, &animation_task_handle);
-    }
+    // _lock_release(&lvgl_api_lock);
 }
 
 static base_status_t m_i2c_init(void)
@@ -338,6 +384,7 @@ static base_status_t m_driver_ssd1306_init(void)
     CHECK_ESP_STATUS(esp_lcd_panel_reset(panel_handle));
     CHECK_ESP_STATUS(esp_lcd_panel_init(panel_handle));
     CHECK_ESP_STATUS(esp_lcd_panel_disp_on_off(panel_handle, true));
+    CHECK_ESP_STATUS(esp_lcd_panel_mirror(panel_handle, true, true));
     ESP_LOGI(TAG, "Installed SSD1306 panel driver success");
     return BS_OK;
 }
@@ -348,6 +395,9 @@ static void m_lvgl_port_task(void *arg)
     uint32_t time_till_next_ms = 0;
     while (1)
     {
+        // // Allow other tasks to run before we process LVGL
+        // vTaskDelay(100);
+        
         _lock_acquire(&lvgl_api_lock);
         time_till_next_ms = lv_timer_handler();
         _lock_release(&lvgl_api_lock);

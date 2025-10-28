@@ -47,28 +47,4 @@ bool bsp_i2c_init(void)
     return (i2c_new_master_bus(&i2c_bus_config, &i2c_bus) == ESP_OK) ? true : false;
 }
 
-// bool bsp_i2c1_write_mem(uint8_t address_slave, uint8_t reg_write, uint8_t *data_write, uint16_t size_data)
-// {
-//   /* Get status bus I2C */
-//   if (HAL_I2C_GetState(&hi2c1) == HAL_I2C_STATE_BUSY)
-//     return false;
-//   /* Transmit data */
-//   if (HAL_I2C_Mem_Write(&hi2c1, address_slave, reg_write, I2C_MEMADD_SIZE_8BIT, data_write, size_data,
-//   BSP_I2C_TIMEOUT) == HAL_ERROR)
-//     return false;
-//   return true;
-// }
-
-// bool bsp_i2c1_read_mem(uint8_t address_slave, uint8_t reg_read, uint8_t *data_read, uint16_t size_data)
-// {
-//   /* Get status bus I2C */
-//   if (HAL_I2C_GetState(&hi2c1) == HAL_I2C_STATE_BUSY)
-//     return false;
-//   /* Transmit data */
-//   if (HAL_I2C_Mem_Read(&hi2c1, address_slave, reg_read, I2C_MEMADD_SIZE_8BIT, data_read, size_data,
-//   BSP_I2C_TIMEOUT) != HAL_OK)
-//     return false;
-//   return true;
-// }
-
 /* End of file -------------------------------------------------------- */

@@ -2,14 +2,10 @@ idf_component_register(SRCS "main.c"
                     ${CMAKE_SOURCE_DIR}/source/src/bsp/bsp_i2c.c
                     ${CMAKE_SOURCE_DIR}/source/src/bsp/bsp_lcd.c
                     ${CMAKE_SOURCE_DIR}/source/src/system/system_display.c
+                    ${CMAKE_SOURCE_DIR}/source/src/system/system_manager.c
                     ${CMAKE_SOURCE_DIR}/source/src/bsp/bsp_rtc.c
-                    ${CMAKE_SOURCE_DIR}/source/src/middleware/video_frame.c
-                    ${CMAKE_SOURCE_DIR}/ui/export/c/ui.c
-                    ${CMAKE_SOURCE_DIR}/ui/export/c/ui_Screen1.c
-                    ${CMAKE_SOURCE_DIR}/ui/export/c/ui_comp_hook.c
-                    ${CMAKE_SOURCE_DIR}/ui/export/c/ui_helpers.c
-                    ${CMAKE_SOURCE_DIR}/ui/export/c/ui_img_snake_game_start_png.c
-                    ${CMAKE_SOURCE_DIR}/ui/export/c/ui_img_snake_game_logo_png.c
+
+                    REQUIRES main
                     INCLUDE_DIRS ".")
 
 include_directories(${CMAKE_SOURCE_DIR}/source/inc/bsp)

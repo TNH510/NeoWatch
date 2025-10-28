@@ -14,7 +14,9 @@
 #define __BASE_TYPE_H
 
 /* Includes ----------------------------------------------------------- */
+#include "esp_log.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/ringbuf.h"
 #include "freertos/task.h"
 
 #include <stdint.h>

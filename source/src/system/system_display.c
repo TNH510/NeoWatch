@@ -10,9 +10,11 @@
  */
 /* Includes ----------------------------------------------------------- */
 #include "system_display.h"
+
+#include "bsp_i2c.h"
 #include "bsp_lcd.h"
-#include "esp_timer.h"
 #include "bsp_rtc.h"
+#include "esp_timer.h"
 
 /* Private defines ---------------------------------------------------- */
 /* Private enumerate/structure ---------------------------------------- */
@@ -39,14 +41,13 @@ void system_display_clock(void)
     //     tick_start = now;
 
     //     // Call bsp lcd display clock function
-        bsp_lcd_clock_display(1, 1, 1, 1, 1, 1);
+    bsp_lcd_clock_display(1, 1, 1, 1, 1, 1);
     // }
 }
 
 void system_display_task(void)
 {
     bsp_lcd_demo_video(0);
-    
 }
 
 /* End of file -------------------------------------------------------- */

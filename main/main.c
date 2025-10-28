@@ -1,20 +1,34 @@
+/**
+ * @file       main.c
+ * @copyright  Copyright (C) 2025 NEO. All rights reserved.
+ * @license    This project is released under the NEO License.
+ * @version    1.0.0
+ * @date       2025-10
+ * @author     Hieu Tran Ngoc
+ * @brief      Main file
+ * @note       None
+ */
+/* Includes ----------------------------------------------------------- */
+#include "system_manager.h"
 
-#include "esp_log.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/ringbuf.h"
-#include "freertos/task.h"
-#include "nimble-nordic-uart.h"
-#include "base_type.h"
-#include "bsp_i2c.h"
-#include "bsp_lcd.h"
-#include "system_display.h"
-#include "bsp_rtc.h"
-
+/* Private defines ---------------------------------------------------- */
+/* Private enumerate/structure ---------------------------------------- */
+/* Private macros ----------------------------------------------------- */
+/* Public variables --------------------------------------------------- */
+/* Private variables -------------------------------------------------- */
+/* Private function prototypes ---------------------------------------- */
+/* Function definitions ----------------------------------------------- */
 void app_main(void)
 {
+    // TODO: Initialize BSP and libraries
+    
+    // Initialize system manager
+    system_manager_init();
+
     while (1)
     {
         // Delay forever
         vTaskDelay(portMAX_DELAY);
     }
 }
+/* End of file -------------------------------------------------------- */

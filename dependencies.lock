@@ -34,21 +34,10 @@ dependencies:
       registry_url: https://components.espressif.com/
       type: service
     version: 9.3.0
-  masuidrive/nimble-nordic-uart:
-    component_hash: 80659307952a9ff6d8e539fe3e39aa10217247b366a3b158dca0e2cf488e8bc0
-    dependencies:
-    - name: idf
-      require: private
-      version: '>=5.0'
-    source:
-      registry_url: https://components.espressif.com/
-      type: service
-    version: 1.0.3
 direct_dependencies:
 - espressif/button
 - idf
 - lvgl/lvgl
-- masuidrive/nimble-nordic-uart
-manifest_hash: 6d78e36c5170c2ce755451d81245cfdb854a3969962ec6d70bb186ddc418330c
-target: esp32
+manifest_hash: cfd817ac1d2771f4edb52abe928c679cca47224098429b660ce09b8ee6cb0410
+target: esp32c6
 version: 2.0.0

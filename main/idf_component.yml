@@ -19,6 +19,3 @@ dependencies:
   # espressif/touch_sensor_fsm: '*'
   # espressif/touch_sensor_lowlevel: '*'
   lvgl/lvgl: '*'
-  # Thêm các thành phần thay thế nếu cần
-  # espressif/led_strip: '*'
-  masuidrive/nimble-nordic-uart: ^1.0.3

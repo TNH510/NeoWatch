@@ -14,6 +14,8 @@
 
 #include "system_display.h"
 
+#include "system_button.h"
+
 /* Private defines ---------------------------------------------------- */
 /* Private enumerate/structure ---------------------------------------- */
 typedef enum
@@ -48,6 +50,9 @@ void system_manager_init(void)
 {
     // Create system manager main thread
     xTaskCreate(system_manager_task, "system_manager", 4096, NULL, 10, NULL);
+
+    // Initialize system for buttons
+    system_button_init();
 }
 
 static void system_manager_task(void *pvParameters)

@@ -1,15 +1,17 @@
 /**
- * @file       main.c
+ * @file       system_button.c
  * @copyright  Copyright (C) 2025 NEO. All rights reserved.
  * @license    This project is released under the NEO License.
  * @version    1.0.0
  * @date       2025-10
- * @author     Hieu Tran Ngoc
- * @brief      Main file
+ * @author     Thach Vu 
+ * @brief      System Button Module
  * @note       None
  */
 /* Includes ----------------------------------------------------------- */
-#include "system_manager.h"
+#include "system_button.h"
+#include "base_type.h"
+
 
 /* Private defines ---------------------------------------------------- */
 /* Private enumerate/structure ---------------------------------------- */
@@ -17,18 +19,22 @@
 /* Public variables --------------------------------------------------- */
 /* Private variables -------------------------------------------------- */
 /* Private function prototypes ---------------------------------------- */
-/* Function definitions ----------------------------------------------- */
-void app_main(void)
-{
-    // TODO: Initialize BSP and libraries
-    
-    // Initialize system manager
-    system_manager_init();
+static void system_button_task(void *pvParameters);
 
+/* Function definitions ----------------------------------------------- */
+void system_button_init(void)
+{
+    // Create a task for system button handling
+    xTaskCreate(system_button_task, "system_button_task", 2048, NULL, 10, NULL);
+}
+
+static void system_button_task(void *pvParameters)
+{
+    // Log hello world every second
     while (1)
     {
-        // Delay forever to release CPU for other tasks
-        vTaskDelay(portMAX_DELAY);
+        ESP_LOGI("SYS_BUTTON", "Hello World from System Button!");
+        vTaskDelay(pdMS_TO_TICKS(5000));
     }
 }
 /* End of file -------------------------------------------------------- */

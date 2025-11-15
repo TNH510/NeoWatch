@@ -38,7 +38,7 @@ static void system_button_task(void *pvParameters)
     {
         /* End of task for system button */
         bsp_button_task();
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 /* End of file -------------------------------------------------------- */

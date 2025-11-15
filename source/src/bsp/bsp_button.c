@@ -12,8 +12,6 @@
 #include "bsp_button.h"
 
 /* Private defines ---------------------------------------------------- */
-#define BUTTON_PIN 7
-
 /* Private enumerate/structure ---------------------------------------- */
 /* Private macros ----------------------------------------------------- */
 /* Public variables --------------------------------------------------- */
@@ -21,18 +19,24 @@
 /* Private function prototypes ---------------------------------------- */
 static bsp_button_callback_t button_callback = NULL;
 
-static gpio_config_t io_conf = {
-    .pin_bit_mask = (1ULL << BUTTON_PIN),  
-    .mode         = GPIO_MODE_INPUT,  
-    .pull_up_en   = GPIO_PULLUP_ENABLE,   
-    .pull_down_en = GPIO_PULLDOWN_DISABLE,
-    .intr_type    = GPIO_INTR_DISABLE   
+static button_t action_button = {
+    .cfg.gpio_num = 7,
+    .state        = IDLE,
+    .timeout      = 0,
 };
 
 /* Function definitions ----------------------------------------------- */
 void bsp_button_init(bsp_button_callback_t callback)
 {
+    // Set log level
+    esp_log_level_set("BSP_BUTTON", ESP_LOG_INFO);
+    
     // Init hardware
+    gpio_config_t io_conf = { .pin_bit_mask = (1ULL << action_button.cfg.gpio_num),
+                              .mode         = GPIO_MODE_INPUT,
+                              .pull_up_en   = GPIO_PULLUP_ENABLE,
+                              .pull_down_en = GPIO_PULLDOWN_DISABLE,
+                              .intr_type    = GPIO_INTR_DISABLE };
     gpio_config(&io_conf);
 
     // Store callback
@@ -42,8 +46,51 @@ void bsp_button_init(bsp_button_callback_t callback)
 void bsp_button_task(void)
 {
     // Check button state
-    // Print button pin state for demonstration
-    ESP_LOGI("BSP_BUTTON", "Pin state: %d", gpio_get_level(BUTTON_PIN));
+    switch (action_button.state)
+    {
+    case IDLE:
+    {
+        if (gpio_get_level(action_button.cfg.gpio_num) == 0)
+        {
+            action_button.state   = WAIT_PRESS_TIMEOUT;
+            action_button.timeout = xTaskGetTickCount() + 10;
+            ESP_LOGD("BSP_BUTTON", "IDLE -> WAIT_PRESS_TIMEOUT");
+        }
+        break;
+    }
+    case WAIT_PRESS_TIMEOUT:
+    {
+        if (gpio_get_level(action_button.cfg.gpio_num) == 1 && (xTaskGetTickCount() <= action_button.timeout))
+        {
+            action_button.state = IDLE;
+            ESP_LOGD("BSP_BUTTON", "WAIT_PRESS_TIMEOUT -> IDLE");
+        }
+        else if (gpio_get_level(action_button.cfg.gpio_num) == 0 && (xTaskGetTickCount() > action_button.timeout))
+        {
+            action_button.state = WAIT_CLICK_TIMEOUT;
+            action_button.timeout = xTaskGetTickCount() + 180;
+            ESP_LOGD("BSP_BUTTON", "WAIT_PRESS_TIMEOUT -> WAIT_CLICK_TIMEOUT");
+        }
+        break;
+    }
+    case WAIT_CLICK_TIMEOUT:
+    {
+        if (gpio_get_level(action_button.cfg.gpio_num) == 1 && (xTaskGetTickCount() <= action_button.timeout))
+        {
+            action_button.state = IDLE;
+
+            // Click event detected
+            ESP_LOGI("BSP_BUTTON", "------------------> Click event detected");
+            ESP_LOGD("BSP_BUTTON", "WAIT_CLICK_TIMEOUT -> IDLE");
+        }
+        else if (gpio_get_level(action_button.cfg.gpio_num) == 1 && (xTaskGetTickCount() > action_button.timeout))
+        {
+            action_button.state = IDLE;
+            ESP_LOGD("BSP_BUTTON", "WAIT_CLICK_TIMEOUT -> IDLE");
+        }
+        break;
+    }
+    }
 }
 
 /* End of file -------------------------------------------------------- */

@@ -60,8 +60,7 @@ static void system_manager_task(void *pvParameters)
     // Log hello world every second
     while (1)
     {
-        ESP_LOGI("SYSTEM_MANAGER", "Hello World from System Manager!");
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelay(portMAX_DELAY);
     }
 }
 /* End of file -------------------------------------------------------- */

@@ -20,12 +20,13 @@
 /* Private variables -------------------------------------------------- */
 /* Private function prototypes ---------------------------------------- */
 static void system_button_task(void *pvParameters);
+static void system_button_callback(void);
 
 /* Function definitions ----------------------------------------------- */
 void system_button_init(void)
 {
     // Init BSP for system button
-    bsp_button_init(NULL);
+    bsp_button_init(system_button_callback);
 
     // Create a task for system button handling
     xTaskCreate(system_button_task, "system_button_task", 2048, NULL, 10, NULL);
@@ -40,5 +41,11 @@ static void system_button_task(void *pvParameters)
         bsp_button_task();
         vTaskDelay(pdMS_TO_TICKS(10));
     }
+}
+
+static void system_button_callback(void)
+{
+    // Handle system button event here
+    ESP_LOGI("SYSTEM_BUTTON", "System button clicked!");
 }
 /* End of file -------------------------------------------------------- */

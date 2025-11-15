@@ -29,7 +29,7 @@ static button_t action_button = {
 void bsp_button_init(bsp_button_callback_t callback)
 {
     // Set log level
-    esp_log_level_set("BSP_BUTTON", ESP_LOG_INFO);
+    esp_log_level_set("BSP_BUTTON", ESP_LOG_NONE);
     
     // Init hardware
     gpio_config_t io_conf = { .pin_bit_mask = (1ULL << action_button.cfg.gpio_num),
@@ -54,7 +54,7 @@ void bsp_button_task(void)
         {
             action_button.state   = WAIT_PRESS_TIMEOUT;
             action_button.timeout = xTaskGetTickCount() + 10;
-            ESP_LOGD("BSP_BUTTON", "IDLE -> WAIT_PRESS_TIMEOUT");
+            ESP_LOGI("BSP_BUTTON", "IDLE -> WAIT_PRESS_TIMEOUT");
         }
         break;
     }
@@ -63,13 +63,13 @@ void bsp_button_task(void)
         if (gpio_get_level(action_button.cfg.gpio_num) == 1 && (xTaskGetTickCount() <= action_button.timeout))
         {
             action_button.state = IDLE;
-            ESP_LOGD("BSP_BUTTON", "WAIT_PRESS_TIMEOUT -> IDLE");
+            ESP_LOGI("BSP_BUTTON", "WAIT_PRESS_TIMEOUT -> IDLE");
         }
         else if (gpio_get_level(action_button.cfg.gpio_num) == 0 && (xTaskGetTickCount() > action_button.timeout))
         {
             action_button.state = WAIT_CLICK_TIMEOUT;
             action_button.timeout = xTaskGetTickCount() + 180;
-            ESP_LOGD("BSP_BUTTON", "WAIT_PRESS_TIMEOUT -> WAIT_CLICK_TIMEOUT");
+            ESP_LOGI("BSP_BUTTON", "WAIT_PRESS_TIMEOUT -> WAIT_CLICK_TIMEOUT");
         }
         break;
     }
@@ -80,13 +80,18 @@ void bsp_button_task(void)
             action_button.state = IDLE;
 
             // Click event detected
+            if (button_callback != NULL)
+            {
+                button_callback();
+            }
+            
             ESP_LOGI("BSP_BUTTON", "------------------> Click event detected");
-            ESP_LOGD("BSP_BUTTON", "WAIT_CLICK_TIMEOUT -> IDLE");
+            ESP_LOGI("BSP_BUTTON", "WAIT_CLICK_TIMEOUT -> IDLE");
         }
         else if (gpio_get_level(action_button.cfg.gpio_num) == 1 && (xTaskGetTickCount() > action_button.timeout))
         {
             action_button.state = IDLE;
-            ESP_LOGD("BSP_BUTTON", "WAIT_CLICK_TIMEOUT -> IDLE");
+            ESP_LOGI("BSP_BUTTON", "WAIT_CLICK_TIMEOUT -> IDLE");
         }
         break;
     }

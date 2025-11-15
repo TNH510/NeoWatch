@@ -5,6 +5,7 @@ idf_component_register(SRCS "main.c"
                     ${CMAKE_SOURCE_DIR}/source/src/system/system_manager.c
                     ${CMAKE_SOURCE_DIR}/source/src/system/system_button.c
                     ${CMAKE_SOURCE_DIR}/source/src/bsp/bsp_rtc.c
+                    ${CMAKE_SOURCE_DIR}/source/src/bsp/bsp_button.c
 
                     REQUIRES main
                     INCLUDE_DIRS ".")

@@ -14,7 +14,7 @@
 #define __BSP_BUTTON_H
 
 /* Includes ----------------------------------------------------------- */
-#include "basic_types.h"
+#include "base_type.h"
 
 /* Public defines ----------------------------------------------------- */
 /* Public enumerate/structure ----------------------------------------- */
@@ -46,10 +46,17 @@ typedef struct
     uint32_t       timeout;
 } button_t;
 
+
+/**
+ * @brief Button callback type
+ */
+typedef void (*bsp_button_callback_t)(void);
+
 /* Public macros ------------------------------------------------------ */
 /* Public variables --------------------------------------------------- */
 /* Public function prototypes ----------------------------------------- */
-void bsp_button_init(void);
+void bsp_button_init(bsp_button_callback_t callback);
+void bsp_button_task(void);
 
 /* -------------------------------------------------------------------- */
 #endif /* __BSP_BUTTON_H */

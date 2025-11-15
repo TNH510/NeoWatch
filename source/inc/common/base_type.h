@@ -18,6 +18,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/ringbuf.h"
 #include "freertos/task.h"
+#include "driver/gpio.h"
 
 #include <stdint.h>
 #include <stdio.h>

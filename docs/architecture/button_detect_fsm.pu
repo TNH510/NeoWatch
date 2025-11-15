@@ -1,0 +1,18 @@
+@startuml 
+skinparam arrowcolor red
+skinparam stateBackgroundColor yellow  
+
+[*] --> IDLE
+IDLE: Wait button press
+WAIT_CLICK_TIMEOUT:
+IDLE --> WAIT_PRESS_TIMEOUT: Button == 0 / Start t_hold
+WAIT_PRESS_TIMEOUT --> WAIT_CLICK_TIMEOUT: Button == 0 &&\n 20ms < t_hold
+
+IDLE --> IDLE: if nothing\n happen
+WAIT_PRESS_TIMEOUT --> IDLE: Button == 1 &&\nt_hold <= 20ms
+WAIT_CLICK_TIMEOUT --> IDLE: Button == 1 &&\n t_hold <= 180ms
+
+WAIT_PRESS_TIMEOUT --> WAIT_PRESS_TIMEOUT: else
+WAIT_CLICK_TIMEOUT --> WAIT_CLICK_TIMEOUT: else
+
+@enduml

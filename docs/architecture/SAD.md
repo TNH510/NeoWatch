@@ -2,38 +2,38 @@
 
 ## Architecture Overview
 
-![NeoWatch Components](./system_overview.png)
+![NeoWatch Components](./pics/system_overview.png)
 
 ## Software Layered Architecture
 
-![NeoWatch Architecture](./Project.svg)
+![NeoWatch Architecture](./pics/architecture.png)
 
 ## Device States
 
-![Device States](./device_state.png)
+![Device States](./pics/device_state.png)
 
 ## Data Flow
 
 ### System Manager
 
-![System Manager](./sys_manager.png)
+![System Manager](./pics/sys_manager.png)
 
 ### System Display
 
-![System Display](./sys_display.png)
+![System Display](./pics/sys_display.png)
 
 ### System Network
 
-![System Network](./sys_network.png)
+![System Network](./pics/sys_network.png)
 
 ### System UI
 
-![System UI](./sys_ui.png)
+![System UI](./pics/sys_ui.png)
 
 ### System Button
 
-![System Button](./sys_button.png)
+![System Button](./pics/sys_button.png)
 
 ### System Settings
 
-![System Settings](./sys_settings.png)
+![System Settings](./pics/sys_settings.png)

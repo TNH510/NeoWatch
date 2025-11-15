@@ -37,7 +37,7 @@ The NeoWatch project includes the following features:
 
 ## Firmware Architecture
 
-![NeoWatch Architecture](./Project.svg)
+![NeoWatch Architecture](./pics/architecture.png)
 
 ## Developer Team
 

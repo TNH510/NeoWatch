@@ -51,7 +51,7 @@ goto :usage
 if "%~1"=="" (
     set ACTION=build flash monitor
 ) else (
-    set ACTION=%*
+    set ACTION=%~1
 )
 goto :select_target
 
@@ -59,7 +59,7 @@ goto :select_target
 if "%~1"=="" (
     set ACTION=build flash monitor
 ) else (
-    set ACTION=%*
+    set ACTION=%~1
 )
 
 set TMPFILE=%TEMP%\esptool_chip_%RANDOM%%RANDOM%.log
@@ -145,7 +145,7 @@ if /I "%MODE%"=="auto" (
         idf.py -B %BUILD_DIR% -DIDF_TARGET=%TARGET% -DSDKCONFIG=%SDKCFG% %ACTION%
     )
 ) else (
-    echo [RUN] idf.py -B %BUILD_DIR% -DIDF_TARGET=%TARGET% -DSDKCONFIG=%SDKCFG% %ACTION%
+    echo [RUN-manual] idf.py -B %BUILD_DIR% -DIDF_TARGET=%TARGET% -DSDKCONFIG=%SDKCFG% %ACTION%
     idf.py -B %BUILD_DIR% -DIDF_TARGET=%TARGET% -DSDKCONFIG=%SDKCFG% %ACTION%
 )
 
@@ -154,17 +154,17 @@ exit /b %ERRORLEVEL%
 :usage
 echo.
 echo Usage:
-echo   flash.bat esp32 [idf_actions...]
-echo   flash.bat esp32c6 [idf_actions...]
-echo   flash.bat auto [idf_actions...]
-echo   flash.bat auto COMx [idf_actions...]
+echo   idf.bat esp32 [idf_actions...]
+echo   idf.bat esp32c6 [idf_actions...]
+echo   idf.bat auto [idf_actions...]
+echo   idf.bat auto COMx [idf_actions...]
 echo.
 echo Examples:
-echo   flash.bat esp32
-echo   flash.bat esp32 build
-echo   flash.bat esp32c6 -p COM9 flash monitor
-echo   flash.bat auto
-echo   flash.bat auto COM8
-echo   flash.bat auto COM9 flash monitor
+echo   idf.bat esp32
+echo   idf.bat esp32 build
+echo   idf.bat esp32c6 -p COM9 flash monitor
+echo   idf.bat auto
+echo   idf.bat auto COM8
+echo   idf.bat auto COM9 flash monitor
 echo.
 exit /b 1

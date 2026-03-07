@@ -77,20 +77,66 @@ If multiple boards are connected, set port explicitly:
 idf.py -p COM8 ...
 ```
 
-## About `flash.bat`
+## About `idf.bat`
 
-Current `flash.bat` mappings in this repository support:
+### Supported Targets
 
-- `esp32`
-- `esp32c6`
-- `auto` detection (currently routed to supported targets above)
+Current `idf.bat` supports:
 
-The script uses one local `build/` folder and runs `fullclean` automatically when switching target.
+- `esp32` - explicit target selection
+- `esp32c6` - explicit target selection  
+- `auto` - auto-detect target from connected device
+- `auto COMx` - auto-detect from specific COM port
 
-To support additional targets like `esp32c3` or `esp32s3`, add new target mappings in `flash.bat`:
+### Build Behavior
 
-- `TARGET=esp32c3` -> `BUILD_DIR=build`, `SDKCFG=sdkconfig.esp32c3`
-- `TARGET=esp32s3` -> `BUILD_DIR=build`, `SDKCFG=sdkconfig.esp32s3`
+- Uses **separate build directories** per target: `build_esp32`, `build_esp32c6`
+- Automatically runs `idf.py fullclean` when target switches
+- Automatically loads correct `sdkconfig.<target>` file
+
+### Usage
+
+```bash
+idf.bat <mode> [action]
+```
+
+**Examples:**
+
+```bash
+# Build, flash, and monitor (default actions)
+idf.bat esp32
+idf.bat esp32c6
+idf.bat auto
+idf.bat auto COM9
+
+# Single action
+idf.bat esp32 build
+idf.bat esp32c6 flash
+idf.bat auto monitor
+
+# Auto-detect on specific port
+idf.bat auto COM8 menuconfig
+```
+
+**Note:** Only the first action is processed. For multiple sequential operations, run the script multiple times.
+
+### Adding New Targets
+
+To support additional targets like `esp32c3` or `esp32s3`, add target blocks in `:select_target` section:
+
+```batch
+if /I "%TARGET%"=="esp32c3" (
+    set BUILD_DIR="build_%TARGET%"
+    set SDKCFG=sdkconfig.esp32c3
+)
+
+if /I "%TARGET%"=="esp32s3" (
+    set BUILD_DIR="build_%TARGET%"
+    set SDKCFG=sdkconfig.esp32s3
+)
+```
+
+Then add mode detection in the argument parsing section (after line ~20).
 
 ## Notes
 

@@ -98,12 +98,12 @@ if not defined TARGET (
 
 :select_target
 if /I "%TARGET%"=="esp32" (
-    set BUILD_DIR=build
+    set BUILD_DIR="build_%TARGET%"
     set SDKCFG=sdkconfig.esp32
 )
 
 if /I "%TARGET%"=="esp32c6" (
-    set BUILD_DIR=build
+    set BUILD_DIR="build_%TARGET%"
     set SDKCFG=sdkconfig.esp32c6
 )
 

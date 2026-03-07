@@ -6,6 +6,13 @@ idf_component_register(SRCS "main.c"
                     ${CMAKE_SOURCE_DIR}/source/src/bsp/bsp_rtc.c
                     ${CMAKE_SOURCE_DIR}/source/src/bsp/bsp.c
 
+                    ${CMAKE_SOURCE_DIR}/ui/export/c/ui.c
+                    ${CMAKE_SOURCE_DIR}/ui/export/c/ui_helpers.c
+                    ${CMAKE_SOURCE_DIR}/ui/export/c/ui_comp_hook.c
+                    ${CMAKE_SOURCE_DIR}/ui/export/c/ui_Screen1.c
+                    ${CMAKE_SOURCE_DIR}/ui/export/c/ui_img_snake_game_logo_png.c
+                    ${CMAKE_SOURCE_DIR}/ui/export/c/ui_img_snake_game_start_png.c
+
                     REQUIRES main
                     INCLUDE_DIRS ".")
 

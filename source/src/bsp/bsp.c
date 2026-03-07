@@ -26,7 +26,7 @@ void bsp_init(void)
     // Initialize all BSP components
     // bsp_i2c_init();
     // bsp_lcd_init();
-    bsp_rtc_init();
+    // bsp_rtc_init();
 }
 
 /* End of file -------------------------------------------------------- */

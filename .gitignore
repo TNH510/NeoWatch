@@ -4,6 +4,8 @@
 **/.vs
 **/obj
 **/.vscode
+.vscode/*
+!.vscode/c_template.code-snippets
 **/.settings
 *.xml
 **/Debug
@@ -60,3 +62,10 @@ Mkfile.old
 dkms.conf
 
 .metadata
+
+build/
+# sdkconfig
+# sdkconfig.old
+
+cache/
+backup/

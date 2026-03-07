@@ -22,3 +22,7 @@ idf.py update-dependencies
 idf.py build    
 idf.py flash
 ```
+
+## Multi-Target Setup
+
+- Per-target `sdkconfig` guide: `docs/sdkconfig_per_target.md`

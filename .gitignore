@@ -64,8 +64,10 @@ dkms.conf
 .metadata
 
 build/
-# sdkconfig
-# sdkconfig.old
+build_esp32/
+build_esp32c6/
+sdkconfig
+sdkconfig.old
 
 cache/
 backup/

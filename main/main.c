@@ -9,6 +9,7 @@
  * @note       None
  */
 /* Includes ----------------------------------------------------------- */
+#include "bsp.h"
 #include "system_manager.h"
 
 /* Private defines ---------------------------------------------------- */
@@ -20,8 +21,9 @@
 /* Function definitions ----------------------------------------------- */
 void app_main(void)
 {
-    // TODO: Initialize BSP and libraries
-    
+    // Initialize BSP and libraries
+    bsp_init();
+
     // Initialize system manager
     system_manager_init();
 

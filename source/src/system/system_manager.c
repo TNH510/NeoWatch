@@ -13,6 +13,7 @@
 #include "system_manager.h"
 
 #include "system_display.h"
+#include "system_settings.h"
 #include "system_button.h"
 
 /* Private defines ---------------------------------------------------- */
@@ -47,7 +48,10 @@ static void system_manager_task(void *pvParameters);
 /* Function definitions ----------------------------------------------- */
 void system_manager_init(void)
 {
-    // // Init system display
+    // Init system settings (load from NVS)
+    system_settings_init();
+
+    // Init system display
     // system_display_init();
 
     // system_display_clock();
@@ -56,7 +60,6 @@ void system_manager_init(void)
     system_button_init();
 
     // Create system manager main thread
-    
     xTaskCreate(system_manager_task, "system_manager", 4096, NULL, 10, NULL);
 }
 

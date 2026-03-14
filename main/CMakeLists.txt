@@ -10,6 +10,8 @@ idf_component_register(SRCS "main.c"
                     ${CMAKE_SOURCE_DIR}/source/src/system/system_button.c
                     ${CMAKE_SOURCE_DIR}/source/src/bsp/bsp_rtc.c
                     ${CMAKE_SOURCE_DIR}/source/src/bsp/bsp.c
+                    ${CMAKE_SOURCE_DIR}/source/src/bsp/bsp_flash.c
+                    ${CMAKE_SOURCE_DIR}/source/src/system/system_settings.c
 
                     ${CMAKE_SOURCE_DIR}/ui/export/c/ui.c
                     ${CMAKE_SOURCE_DIR}/ui/export/c/ui_helpers.c

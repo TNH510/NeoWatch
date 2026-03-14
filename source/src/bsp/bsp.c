@@ -13,6 +13,8 @@
 #include "bsp_i2c.h"
 #include "bsp_rtc.h"
 #include "bsp_lcd.h"
+#include "bsp_gpio.h"
+#include "bsp_button.h"
 #include "base_type.h"
 
 /* Private defines ---------------------------------------------------- */
@@ -28,6 +30,8 @@ void bsp_init(void)
     // CHECK_STATUS(bsp_i2c_init());
     bsp_i2c_init();
     bsp_lcd_init();
+    bsp_gpio_init();
+    bsp_button_init();
     // CHECK_STATUS(bsp_rtc_init());
     // CHECK_STATUS(bsp_lcd_init());
 }

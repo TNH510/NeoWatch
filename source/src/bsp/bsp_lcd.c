@@ -20,6 +20,7 @@
 #include "lvgl.h"
 #include "video_frame.h"
 #include "bsp_rtc.h"
+#include "bsp_i2c.h"
 
 #include <esp_heap_caps.h>
 #include <sys/lock.h>
@@ -31,8 +32,9 @@ static const char *TAG = "BSP_LCD";
 
 /* Private defines ---------------------------------------------------- */
 #define I2C_BUS_PORT           0
-#define PIN_NUM_SDA            22
-#define PIN_NUM_SCL            21
+/* Based on the configuration for current hardware */
+#define PIN_NUM_SDA            13
+#define PIN_NUM_SCL            12
 #define PIN_NUM_RST            -1
 #define I2C_HW_ADDR            0x3C  // 0x3C or 0x3D for SSD1306, 0x3C for SH1107
 #define LCD_PIXEL_CLOCK_HZ     (400 * 1000)
@@ -234,7 +236,9 @@ static void m_display_update(void)
 base_status_t bsp_lcd_init(void)
 {
     ESP_LOGI(TAG, "Initialize I2C bus");
-    CHECK_STATUS(m_i2c_init());
+    i2c_bus = bsp_i2c_get_handle();
+    // memcpy(i2c_bus, bsp_i2c_get_handle(), sizeof(i2c_master_bus_handle_t));
+    // CHECK_STATUS();
     CHECK_STATUS(m_panel_init());
     CHECK_STATUS(m_driver_ssd1306_init());
     m_graphic_init();
@@ -333,21 +337,24 @@ void bsp_lcd_demo_video(uint8_t video_num)
 
 static base_status_t m_i2c_init(void)
 {
-    i2c_master_bus_config_t bus_config = {
-        .clk_source                   = I2C_CLK_SRC_DEFAULT,
-        .glitch_ignore_cnt            = 7,
-        .i2c_port                     = I2C_BUS_PORT,
-        .sda_io_num                   = PIN_NUM_SDA,
-        .scl_io_num                   = PIN_NUM_SCL,
-        .flags.enable_internal_pullup = true,
-    };
+    // i2c_master_bus_config_t bus_config = {
+    //     .clk_source                   = I2C_CLK_SRC_DEFAULT,
+    //     .glitch_ignore_cnt            = 7,
+    //     .i2c_port                     = I2C_BUS_PORT,
+    //     .sda_io_num                   = PIN_NUM_SDA,
+    //     .scl_io_num                   = PIN_NUM_SCL,
+    //     .flags.enable_internal_pullup = true,
+    // };
 
-    if (i2c_new_master_bus(&bus_config, &i2c_bus) == ESP_OK)
-    {
-        ESP_LOGI(TAG, "Initialized I2C bus success");
-        return BS_OK;
-    }
-    return BS_ERROR;
+    // if (i2c_new_master_bus(&bus_config, &i2c_bus) == ESP_OK)
+    // {
+    //     ESP_LOGI(TAG, "Initialized I2C bus success");
+    //     return BS_OK;
+    // }
+    // return BS_ERROR;
+
+    // bsp_i2c_add_device(I2C_HW_ADDR, LCD_PIXEL_CLOCK_HZ, i2c_bus);
+    return BS_OK;
 }
 
 static base_status_t m_panel_init(void)

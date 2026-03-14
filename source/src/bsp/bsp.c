@@ -13,6 +13,7 @@
 #include "bsp_i2c.h"
 #include "bsp_rtc.h"
 #include "bsp_lcd.h"
+#include "base_type.h"
 
 /* Private defines ---------------------------------------------------- */
 /* Private enumerate/structure ---------------------------------------- */
@@ -24,9 +25,11 @@
 void bsp_init(void)
 {
     // Initialize all BSP components
-    // bsp_i2c_init();
-    // bsp_lcd_init();
-    bsp_rtc_init();
+    // CHECK_STATUS(bsp_i2c_init());
+    bsp_i2c_init();
+    bsp_lcd_init();
+    // CHECK_STATUS(bsp_rtc_init());
+    // CHECK_STATUS(bsp_lcd_init());
 }
 
 /* End of file -------------------------------------------------------- */

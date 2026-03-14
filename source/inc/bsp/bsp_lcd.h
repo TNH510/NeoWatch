@@ -15,6 +15,7 @@
 
 /* Includes ----------------------------------------------------------- */
 #include "base_type.h"
+#include "bsp_i2c.h"
 /* Public defines ----------------------------------------------------- */
 /* Public enumerate/structure ----------------------------------------- */
 typedef enum

@@ -31,6 +31,15 @@ typedef struct
     drv_button_event_t    event;
 } drv_button_cb_ctx_t;
 
+/**
+ * @brief Internal button instance that wraps espressif handle and tracks contexts
+ */
+typedef struct
+{
+    button_handle_t      esp_handle;
+    drv_button_cb_ctx_t *cb_ctx[DRV_BUTTON_EVENT_MAX];
+} drv_button_instance_t;
+
 /* Private macros ----------------------------------------------------- */
 /* Public variables --------------------------------------------------- */
 /* Private variables -------------------------------------------------- */
@@ -55,6 +64,12 @@ base_status_t drv_button_init(const drv_button_config_t *config, drv_button_hand
         return BS_ERROR;
     }
 
+    drv_button_instance_t *instance = (drv_button_instance_t *)calloc(1, sizeof(drv_button_instance_t));
+    if (instance == NULL)
+    {
+        return BS_ERROR;
+    }
+
     button_config_t btn_cfg = {
         .long_press_time  = 0,
         .short_press_time = 0,
@@ -67,16 +82,16 @@ base_status_t drv_button_init(const drv_button_config_t *config, drv_button_hand
         .disable_pull     = false,
     };
 
-    button_handle_t btn_handle = NULL;
-    esp_err_t ret = iot_button_new_gpio_device(&btn_cfg, &gpio_cfg, &btn_handle);
+    esp_err_t ret = iot_button_new_gpio_device(&btn_cfg, &gpio_cfg, &instance->esp_handle);
 
     if (ret != ESP_OK)
     {
         ESP_LOGE(DRV_BUTTON_TAG, "Failed to create button: %s", esp_err_to_name(ret));
+        free(instance);
         return BS_ERROR;
     }
 
-    *handle = (drv_button_handle_t)btn_handle;
+    *handle = (drv_button_handle_t)instance;
     return BS_OK;
 }
 
@@ -88,6 +103,15 @@ base_status_t drv_button_register_callback(drv_button_handle_t  handle,
     if ((handle == NULL) || (callback == NULL) || (event >= DRV_BUTTON_EVENT_MAX))
     {
         return BS_ERROR;
+    }
+
+    drv_button_instance_t *instance = (drv_button_instance_t *)handle;
+
+    /* Free any previously registered context for this event */
+    if (instance->cb_ctx[event] != NULL)
+    {
+        free(instance->cb_ctx[event]);
+        instance->cb_ctx[event] = NULL;
     }
 
     /* Allocate context for the callback */
@@ -103,7 +127,7 @@ base_status_t drv_button_register_callback(drv_button_handle_t  handle,
 
     button_event_t esp_event = drv_button_map_event(event);
 
-    esp_err_t ret = iot_button_register_cb((button_handle_t)handle, esp_event, NULL,
+    esp_err_t ret = iot_button_register_cb(instance->esp_handle, esp_event, NULL,
                                            drv_button_esp_callback, (void *)ctx);
     if (ret != ESP_OK)
     {
@@ -111,6 +135,7 @@ base_status_t drv_button_register_callback(drv_button_handle_t  handle,
         return BS_ERROR;
     }
 
+    instance->cb_ctx[event] = ctx;
     return BS_OK;
 }
 
@@ -122,11 +147,19 @@ base_status_t drv_button_unregister_callback(drv_button_handle_t handle,
         return BS_ERROR;
     }
 
+    drv_button_instance_t *instance = (drv_button_instance_t *)handle;
     button_event_t esp_event = drv_button_map_event(event);
 
-    return (iot_button_unregister_cb((button_handle_t)handle, esp_event, NULL) == ESP_OK)
-               ? BS_OK
-               : BS_ERROR;
+    esp_err_t ret = iot_button_unregister_cb(instance->esp_handle, esp_event, NULL);
+
+    /* Free the callback context */
+    if (instance->cb_ctx[event] != NULL)
+    {
+        free(instance->cb_ctx[event]);
+        instance->cb_ctx[event] = NULL;
+    }
+
+    return (ret == ESP_OK) ? BS_OK : BS_ERROR;
 }
 
 base_status_t drv_button_deinit(drv_button_handle_t handle)
@@ -136,7 +169,23 @@ base_status_t drv_button_deinit(drv_button_handle_t handle)
         return BS_ERROR;
     }
 
-    return (iot_button_delete((button_handle_t)handle) == ESP_OK) ? BS_OK : BS_ERROR;
+    drv_button_instance_t *instance = (drv_button_instance_t *)handle;
+
+    esp_err_t ret = iot_button_delete(instance->esp_handle);
+
+    /* Free all callback contexts */
+    for (int i = 0; i < DRV_BUTTON_EVENT_MAX; i++)
+    {
+        if (instance->cb_ctx[i] != NULL)
+        {
+            free(instance->cb_ctx[i]);
+            instance->cb_ctx[i] = NULL;
+        }
+    }
+
+    free(instance);
+
+    return (ret == ESP_OK) ? BS_OK : BS_ERROR;
 }
 
 drv_button_event_t drv_button_get_event(drv_button_handle_t handle)
@@ -146,7 +195,8 @@ drv_button_event_t drv_button_get_event(drv_button_handle_t handle)
         return DRV_BUTTON_EVENT_MAX;
     }
 
-    button_event_t esp_event = iot_button_get_event((button_handle_t)handle);
+    drv_button_instance_t *instance = (drv_button_instance_t *)handle;
+    button_event_t esp_event = iot_button_get_event(instance->esp_handle);
 
     switch (esp_event)
     {

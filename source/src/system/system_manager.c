@@ -13,6 +13,7 @@
 #include "system_manager.h"
 
 #include "system_display.h"
+#include "system_button.h"
 
 /* Private defines ---------------------------------------------------- */
 /* Private enumerate/structure ---------------------------------------- */
@@ -46,11 +47,16 @@ static void system_manager_task(void *pvParameters);
 /* Function definitions ----------------------------------------------- */
 void system_manager_init(void)
 {
-    // Init system display
-    system_display_init();
+    // // Init system display
+    // system_display_init();
 
-    system_display_clock();
+    // system_display_clock();
+
+    // Init system button
+    system_button_init();
+
     // Create system manager main thread
+    
     xTaskCreate(system_manager_task, "system_manager", 4096, NULL, 10, NULL);
 }
 
@@ -60,8 +66,8 @@ static void system_manager_task(void *pvParameters)
     while (1)
     {
         // ESP_LOGI("SYSTEM_MANAGER", "Hello World from System Manager!");
-        // vTaskDelay(pdMS_TO_TICKS(1000));
-        system_display_task();
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        // system_display_task();
     }
 }
 /* End of file -------------------------------------------------------- */

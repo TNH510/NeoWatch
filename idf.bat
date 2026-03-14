@@ -32,6 +32,12 @@ if /I "%MODE%"=="esp32c6" (
     goto :run_explicit
 )
 
+if /I "%MODE%"=="esp32s3" (
+    set TARGET=esp32s3
+    shift
+    goto :run_explicit
+)
+
 if /I "%MODE%"=="auto" (
     set PORT=%~2
     if /I "%PORT:~0,3%"=="COM" (
@@ -81,6 +87,9 @@ if errorlevel 1 (
 
 findstr /I /C:"ESP32-C6" "%TMPFILE%" >nul && set TARGET=esp32c6
 if not defined TARGET (
+    findstr /I /C:"ESP32-S3" "%TMPFILE%" >nul && set TARGET=esp32s3
+)
+if not defined TARGET (
     findstr /I /R /C:"Detecting chip type... ESP32$" /C:"Chip is ESP32" "%TMPFILE%" >nul && set TARGET=esp32
 )
 
@@ -105,6 +114,11 @@ if /I "%TARGET%"=="esp32" (
 if /I "%TARGET%"=="esp32c6" (
     set BUILD_DIR="build_%TARGET%"
     set SDKCFG=sdkconfig.esp32c6
+)
+
+if /I "%TARGET%"=="esp32s3" (
+    set BUILD_DIR="build_%TARGET%"
+    set SDKCFG=sdkconfig.esp32s3
 )
 
 if "%BUILD_DIR%"=="" (
@@ -156,6 +170,7 @@ echo.
 echo Usage:
 echo   idf.bat esp32 [idf_actions...]
 echo   idf.bat esp32c6 [idf_actions...]
+echo   idf.bat esp32s3 [idf_actions...]
 echo   idf.bat auto [idf_actions...]
 echo   idf.bat auto COMx [idf_actions...]
 echo.
@@ -163,6 +178,7 @@ echo Examples:
 echo   idf.bat esp32
 echo   idf.bat esp32 build
 echo   idf.bat esp32c6 -p COM9 flash monitor
+echo   idf.bat esp32s3 build flash monitor
 echo   idf.bat auto
 echo   idf.bat auto COM8
 echo   idf.bat auto COM9 flash monitor

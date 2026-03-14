@@ -66,6 +66,7 @@ dkms.conf
 build/
 build_esp32/
 build_esp32c6/
+build_esp32s3/
 sdkconfig
 sdkconfig.old
 

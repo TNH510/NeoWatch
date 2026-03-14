@@ -25,7 +25,7 @@ void app_main(void)
     bsp_init();
 
     // Initialize system manager
-    // system_manager_init();
+    system_manager_init();
 
     while (1)
     {

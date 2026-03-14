@@ -50,7 +50,6 @@ void system_manager_init(void)
     system_display_init();
 
     system_display_clock();
-
     // Create system manager main thread
     xTaskCreate(system_manager_task, "system_manager", 4096, NULL, 10, NULL);
 }

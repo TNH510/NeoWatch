@@ -98,7 +98,7 @@ typedef struct
 #define CHECK_ESP_STATUS(expr)  \
     do                          \
     {                           \
-        esp_err_t ret = (expr); \
+        base_status_t ret = (expr); \
         if (ESP_OK != ret)      \
         {                       \
             return (BS_ERROR);  \

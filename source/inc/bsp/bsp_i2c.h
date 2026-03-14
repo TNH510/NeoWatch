@@ -21,8 +21,8 @@
 
 /* Public defines ----------------------------------------------------- */
 #define BSP_I2C_PORT        0    /*!< I2C bus port number              */
-#define BSP_I2C_SCL_PIN     22   /*!< GPIO pin number for SCL          */
-#define BSP_I2C_SDA_PIN     21   /*!< GPIO pin number for SDA          */
+#define BSP_I2C_SCL_PIN     12   /*!< GPIO pin number for SCL          */
+#define BSP_I2C_SDA_PIN     13   /*!< GPIO pin number for SDA          */
 #define BSP_I2C_TIMEOUT_MS  100  /*!< Default transaction timeout (ms) */
 
 /* Public enumerate/structure ----------------------------------------- */
@@ -33,10 +33,10 @@
 /**
  * @brief  Initialize the I2C master bus
  *
- * @return true   Initialization succeeded
- * @return false  Initialization failed
+ * @return BS_OK   Initialization succeeded
+ * @return BS_ERROR  Initialization failed
  */
-bool bsp_i2c_init(void);
+base_status_t bsp_i2c_init(void);
 
 /**
  * @brief  De-initialize the I2C master bus and free all resources
@@ -59,10 +59,11 @@ i2c_master_bus_handle_t bsp_i2c_get_handle(void);
  * @param[in]  scl_speed_hz SCL clock frequency in Hz (e.g. 400000 for Fast-mode)
  * @param[out] dev_handle   Handle for the newly added device
  *
- * @return true   Device added successfully
- * @return false  Failed to add device (bus not initialized or driver error)
+ * @return ESP_OK   Device added successfully
+ * @return ESP_ERR_INVALID_ARG  Failed to add device due to invalid arguments
+ * @return ESP_FAIL Failed to add device due to other errors
  */
-bool bsp_i2c_add_device(uint16_t dev_addr, uint32_t scl_speed_hz,
+base_status_t bsp_i2c_add_device(uint16_t dev_addr, uint32_t scl_speed_hz,
                         i2c_master_dev_handle_t *dev_handle);
 
 /**
@@ -70,10 +71,11 @@ bool bsp_i2c_add_device(uint16_t dev_addr, uint32_t scl_speed_hz,
  *
  * @param[in] dev_handle  Device handle returned by bsp_i2c_add_device()
  *
- * @return true   Device removed successfully
- * @return false  Failed to remove device
+ * @return ESP_OK   Device removed successfully
+ * @return ESP_ERR_INVALID_ARG  Failed to remove device due to invalid arguments
+ * @return ESP_FAIL Failed to remove device due to other errors
  */
-bool bsp_i2c_remove_device(i2c_master_dev_handle_t dev_handle);
+base_status_t bsp_i2c_remove_device(i2c_master_dev_handle_t dev_handle);
 
 /**
  * @brief  Write data to an I2C device
@@ -82,10 +84,11 @@ bool bsp_i2c_remove_device(i2c_master_dev_handle_t dev_handle);
  * @param[in] data        Pointer to the transmit buffer
  * @param[in] len         Number of bytes to write
  *
- * @return true   Write succeeded
- * @return false  Write failed
+ * @return ESP_OK   Write succeeded
+ * @return ESP_ERR_INVALID_ARG  Write failed due to invalid arguments
+ * @return ESP_FAIL Write failed due to other errors
  */
-bool bsp_i2c_write(i2c_master_dev_handle_t dev_handle, const uint8_t *data, size_t len);
+base_status_t bsp_i2c_write(i2c_master_dev_handle_t dev_handle, const uint8_t *data, size_t len);
 
 /**
  * @brief  Read data from an I2C device
@@ -94,10 +97,11 @@ bool bsp_i2c_write(i2c_master_dev_handle_t dev_handle, const uint8_t *data, size
  * @param[out] data        Pointer to the receive buffer
  * @param[in]  len         Number of bytes to read
  *
- * @return true   Read succeeded
- * @return false  Read failed
+ * @return ESP_OK   Read succeeded
+ * @return ESP_ERR_INVALID_ARG  Read failed due to invalid arguments
+ * @return ESP_FAIL Read failed due to other errors
  */
-bool bsp_i2c_read(i2c_master_dev_handle_t dev_handle, uint8_t *data, size_t len);
+base_status_t bsp_i2c_read(i2c_master_dev_handle_t dev_handle, uint8_t *data, size_t len);
 
 /**
  * @brief  Perform a combined write-then-read transaction (register access)
@@ -111,10 +115,11 @@ bool bsp_i2c_read(i2c_master_dev_handle_t dev_handle, uint8_t *data, size_t len)
  * @param[out] read_data   Buffer to store the received bytes
  * @param[in]  read_len    Number of bytes to read
  *
- * @return true   Transaction succeeded
- * @return false  Transaction failed
+ * @return ESP_OK   Transaction succeeded
+ * @return ESP_ERR_INVALID_ARG  Transaction failed due to invalid arguments
+ * @return ESP_FAIL Transaction failed due to other errors
  */
-bool bsp_i2c_write_read(i2c_master_dev_handle_t dev_handle,
+base_status_t bsp_i2c_write_read(i2c_master_dev_handle_t dev_handle,
                         const uint8_t          *write_data, size_t write_len,
                         uint8_t                *read_data,  size_t read_len);
 

@@ -36,13 +36,13 @@ static i2c_master_bus_handle_t s_i2c_bus = NULL;
 
 /* Function definitions ----------------------------------------------- */
 
-bool bsp_i2c_init(void)
+base_status_t bsp_i2c_init(void)
 {
     if (s_i2c_bus != NULL)
     {
-        return true;
+        return BS_OK;
     }
-    return (i2c_new_master_bus(&s_i2c_bus_config, &s_i2c_bus) == ESP_OK);
+    return (i2c_new_master_bus(&s_i2c_bus_config, &s_i2c_bus) != ESP_OK ? BS_ERROR : BS_OK);
 }
 
 void bsp_i2c_deinit(void)
@@ -60,12 +60,12 @@ i2c_master_bus_handle_t bsp_i2c_get_handle(void)
     return s_i2c_bus;
 }
 
-bool bsp_i2c_add_device(uint16_t dev_addr, uint32_t scl_speed_hz,
+base_status_t bsp_i2c_add_device(uint16_t dev_addr, uint32_t scl_speed_hz,
                         i2c_master_dev_handle_t *dev_handle)
 {
     if ((s_i2c_bus == NULL) || (dev_handle == NULL))
     {
-        return false;
+        return BS_ERROR;
     }
 
     i2c_device_config_t dev_config = {
@@ -74,48 +74,48 @@ bool bsp_i2c_add_device(uint16_t dev_addr, uint32_t scl_speed_hz,
         .scl_speed_hz    = scl_speed_hz,
     };
 
-    return (i2c_master_bus_add_device(s_i2c_bus, &dev_config, dev_handle) == ESP_OK);
+    return (i2c_master_bus_add_device(s_i2c_bus, &dev_config, dev_handle) == ESP_OK) ? BS_OK : BS_ERROR;
 }
 
-bool bsp_i2c_remove_device(i2c_master_dev_handle_t dev_handle)
+base_status_t bsp_i2c_remove_device(i2c_master_dev_handle_t dev_handle)
 {
     if (dev_handle == NULL)
     {
-        return false;
+        return BS_ERROR;
     }
-    return (i2c_master_bus_rm_device(dev_handle) == ESP_OK);
+    return (i2c_master_bus_rm_device(dev_handle) == ESP_OK) ? BS_OK : BS_ERROR;
 }
 
-bool bsp_i2c_write(i2c_master_dev_handle_t dev_handle, const uint8_t *data, size_t len)
+base_status_t bsp_i2c_write(i2c_master_dev_handle_t dev_handle, const uint8_t *data, size_t len)
 {
     if ((dev_handle == NULL) || (data == NULL))
     {
-        return false;
+        return BS_ERROR;
     }
-    return (i2c_master_transmit(dev_handle, data, len, BSP_I2C_TIMEOUT_MS) == ESP_OK);
+    return (i2c_master_transmit(dev_handle, data, len, BSP_I2C_TIMEOUT_MS) == ESP_OK) ? BS_OK : BS_ERROR;
 }
 
-bool bsp_i2c_read(i2c_master_dev_handle_t dev_handle, uint8_t *data, size_t len)
+base_status_t bsp_i2c_read(i2c_master_dev_handle_t dev_handle, uint8_t *data, size_t len)
 {
     if ((dev_handle == NULL) || (data == NULL))
     {
-        return false;
+        return BS_ERROR;
     }
-    return (i2c_master_receive(dev_handle, data, len, BSP_I2C_TIMEOUT_MS) == ESP_OK);
+    return (i2c_master_receive(dev_handle, data, len, BSP_I2C_TIMEOUT_MS) == ESP_OK) ? BS_OK : BS_ERROR;
 }
 
-bool bsp_i2c_write_read(i2c_master_dev_handle_t dev_handle,
+base_status_t bsp_i2c_write_read(i2c_master_dev_handle_t dev_handle,
                         const uint8_t          *write_data, size_t write_len,
                         uint8_t                *read_data,  size_t read_len)
 {
     if ((dev_handle == NULL) || (write_data == NULL) || (read_data == NULL))
     {
-        return false;
+        return BS_ERROR;
     }
     return (i2c_master_transmit_receive(dev_handle,
                                         write_data, write_len,
                                         read_data, read_len,
-                                        BSP_I2C_TIMEOUT_MS) == ESP_OK);
+                                        BSP_I2C_TIMEOUT_MS) == ESP_OK) ? BS_OK : BS_ERROR;
 }
 
 /* End of file -------------------------------------------------------- */

@@ -7,6 +7,7 @@ idf_component_register(SRCS "main.c"
                     ${CMAKE_SOURCE_DIR}/source/src/driver/drv_button.c
                     ${CMAKE_SOURCE_DIR}/source/src/system/system_display.c
                     ${CMAKE_SOURCE_DIR}/source/src/system/system_manager.c
+                    ${CMAKE_SOURCE_DIR}/source/src/system/system_button.c
                     ${CMAKE_SOURCE_DIR}/source/src/bsp/bsp_rtc.c
                     ${CMAKE_SOURCE_DIR}/source/src/bsp/bsp.c
 

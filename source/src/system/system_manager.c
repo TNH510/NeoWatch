@@ -13,6 +13,7 @@
 #include "system_manager.h"
 
 #include "system_display.h"
+#include "system_settings.h"
 
 /* Private defines ---------------------------------------------------- */
 /* Private enumerate/structure ---------------------------------------- */
@@ -46,6 +47,9 @@ static void system_manager_task(void *pvParameters);
 /* Function definitions ----------------------------------------------- */
 void system_manager_init(void)
 {
+    // Init system settings (load from NVS)
+    system_settings_init();
+
     // Init system display
     system_display_init();
 

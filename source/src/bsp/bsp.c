@@ -10,10 +10,12 @@
  */
 /* Includes ----------------------------------------------------------- */
 #include "bsp.h"
-#include "bsp_i2c.h"
-#include "bsp_rtc.h"
-#include "bsp_lcd.h"
+
 #include "base_type.h"
+#include "bsp_flash.h"
+#include "bsp_i2c.h"
+#include "bsp_lcd.h"
+#include "bsp_rtc.h"
 
 /* Private defines ---------------------------------------------------- */
 /* Private enumerate/structure ---------------------------------------- */
@@ -24,6 +26,9 @@
 /* Function definitions ----------------------------------------------- */
 void bsp_init(void)
 {
+    // Initialize NVS flash storage
+    bsp_flash_init();
+
     // Initialize all BSP components
     // CHECK_STATUS(bsp_i2c_init());
     bsp_i2c_init();

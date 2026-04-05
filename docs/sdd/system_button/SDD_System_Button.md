@@ -74,15 +74,20 @@ iot_button_register_cb(btn, BUTTON_LONG_PRESS_START, NULL, on_button_event, (voi
 
 ## 6. Publish Contract to System Manager
 
-Each callback publishes one message to System Manager queue.
+Each callback publishes one `sm_event_msg_t` to the System Manager ingress queue.
 
 ```c
+/* Unified event message (defined in system_manager_events.h) */
 typedef struct
 {
-    system_button_event_t event;
-    uint32_t timestamp_ms;
-    uint8_t button_id;
-} system_button_msg_t;
+    sm_event_source_t source;       /* SM_SRC_BUTTON                    */
+    uint16_t          event_id;     /* system_button_event_t value      */
+    uint32_t          timestamp_ms;
+    union {
+        struct { uint8_t button_id; } button;
+        /* other subsystem payloads omitted */
+    } data;
+} sm_event_msg_t;
 ```
 
 Routing expectation:

@@ -15,6 +15,7 @@ dependencies:
   #   # All dependencies of `main` are public by default.
   #   public: true
   espressif/button: '*'
+  espressif/led_strip: '*'
   # Xóa tạm thời do không có phiên bản cho ESP32
   # espressif/touch_sensor_fsm: '*'
   # espressif/touch_sensor_lowlevel: '*'

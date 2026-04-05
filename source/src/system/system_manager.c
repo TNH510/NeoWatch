@@ -15,6 +15,7 @@
 #include "system_display.h"
 #include "system_settings.h"
 #include "system_button.h"
+#include "system_ui.h"
 
 /* Private defines ---------------------------------------------------- */
 #define SM_TAG              "SYS_MGR"
@@ -50,8 +51,10 @@ void system_manager_init(void)
     }
 
     /* Init subsystems */
+    // system_display_init();
     system_settings_init();
     system_button_init();
+    system_ui_init();
 
     /* Create manager task */
     if (xTaskCreate(system_manager_task, "system_manager",
@@ -195,8 +198,28 @@ static void sm_handle_display_event(const sm_event_msg_t *evt)
  */
 static void sm_handle_ui_event(const sm_event_msg_t *evt)
 {
-    ESP_LOGD(SM_TAG, "UI event id=%d", evt->event_id);
-    /* UI state change events can be handled here in the future */
+    switch ((system_ui_evt_t) evt->event_id)
+    {
+    case SYS_UI_EVT_MODE_CHANGED:
+        ESP_LOGD(SM_TAG, "UI mode changed (mode=%d)", evt->data.ui.arg1);
+        break;
+
+    case SYS_UI_EVT_LED_STATE_APPLIED:
+        ESP_LOGD(SM_TAG, "UI LED state applied");
+        break;
+
+    case SYS_UI_EVT_NOTIFICATION_ACK:
+        ESP_LOGD(SM_TAG, "UI notification ack");
+        break;
+
+    case SYS_UI_EVT_ERROR:
+        ESP_LOGW(SM_TAG, "UI error reported");
+        break;
+
+    default:
+        ESP_LOGW(SM_TAG, "Unknown UI event id=%d", evt->event_id);
+        break;
+    }
 }
 
 /**
@@ -230,7 +253,7 @@ static void sm_handle_settings_event(const sm_event_msg_t *evt)
 }
 
 /**
- * @brief  Transition to a new system mode and log
+ * @brief  Transition to a new system mode, notify Q_UI
  */
 static void sm_set_mode(sm_mode_t new_mode)
 {
@@ -239,12 +262,21 @@ static void sm_set_mode(sm_mode_t new_mode)
         return;
     }
 
-    static const char *mode_names[] = {"BOOT", "STANDBY", "MENU", "SETTING"};
+    static const char      *mode_names[] = {"BOOT", "STANDBY", "MENU", "SETTING"};
+    static system_ui_cmd_t  mode_cmds[]  = {
+        SYS_UI_CMD_MODE_BOOT,
+        SYS_UI_CMD_MODE_STANDBY,
+        SYS_UI_CMD_MODE_MENU,
+        SYS_UI_CMD_MODE_SETTING,
+    };
 
     ESP_LOGI(SM_TAG, "Mode: %s -> %s", mode_names[s_mode], mode_names[new_mode]);
     s_mode = new_mode;
 
-    /* Future: post mode event to Q_DIS and Q_UI here */
+    /* Notify System UI of the mode transition */
+    system_ui_send_cmd(mode_cmds[new_mode], 0, 0);
+
+    /* Future: post mode event to Q_DIS here */
 }
 
 /* End of file -------------------------------------------------------- */

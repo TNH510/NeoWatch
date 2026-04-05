@@ -38,7 +38,6 @@ static const char *TAG = "BSP_LCD";
 #define PIN_NUM_RST            -1
 #define I2C_HW_ADDR            0x3C  // 0x3C or 0x3D for SSD1306, 0x3C for SH1107
 #define LCD_PIXEL_CLOCK_HZ     (400 * 1000)
-#define I2C_HW_ADDR            0x3C  // 0x3C or 0x3D for SSD1306, 0x3C for SH1107
 // Bit number used to represent command and parameter
 #define LCD_CMD_BITS           8
 #define LCD_PARAM_BITS         8

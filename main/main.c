@@ -11,6 +11,7 @@
 /* Includes ----------------------------------------------------------- */
 #include "bsp.h"
 #include "system_manager.h"
+#include "system_ui.h"
 
 /* Private defines ---------------------------------------------------- */
 /* Private enumerate/structure ---------------------------------------- */
@@ -24,13 +25,10 @@ void app_main(void)
     // Initialize BSP and libraries
     bsp_init();
 
-    // Initialize system manager
-    system_manager_init();
+    // TODO: restore after LED test
+    // system_manager_init();
 
-    while (1)
-    {
-        // Delay forever
-        vTaskDelay(portMAX_DELAY);
-    }
+    // Standalone LED blink test (blocks forever)
+    system_ui_test();
 }
 /* End of file -------------------------------------------------------- */

@@ -10,7 +10,9 @@
  */
 /* Includes ----------------------------------------------------------- */
 #include "system_button.h"
+#include "system_manager.h"
 #include "bsp_button.h"
+#include "esp_timer.h"
 
 /* Private defines ---------------------------------------------------- */
 /* Private enumerate/structure ---------------------------------------- */
@@ -19,6 +21,7 @@
 /* Private variables -------------------------------------------------- */
 /* Private function prototypes ---------------------------------------- */
 static void system_button_task(void *pvParameters);
+static void m_publish_button_event(system_button_event_t btn_event);
 
 // Callback function for button event
 static void m_button_click_callback(drv_button_event_t event, void *usr_data);
@@ -71,12 +74,22 @@ base_status_t system_button_init(void)
 
 static void system_button_task(void *pvParameters)
 {
-    // Log hello world every second
+    (void) pvParameters;
+    /* Button callbacks handle all work; task kept for future use */
     while (1)
     {
-        ESP_LOGI("SYSTEM_BUTTON", "Hello World from System Button!");
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
+}
+
+static void m_publish_button_event(system_button_event_t btn_event)
+{
+    sm_event_msg_t msg = {
+        .source       = SM_SRC_BUTTON,
+        .event_id     = (uint32_t) btn_event,
+        .timestamp_ms = (uint32_t)(esp_timer_get_time() / 1000),
+    };
+    system_manager_publish(&msg);
 }
 
 static void m_button_click_callback(drv_button_event_t event, void *usr_data)
@@ -84,6 +97,7 @@ static void m_button_click_callback(drv_button_event_t event, void *usr_data)
     (void) event;
     (void) usr_data;
     ESP_LOGI("SYSTEM_BUTTON", "Button Single Clicked!");
+    m_publish_button_event(SYS_BUTTON_EVENT_CLICK);
 }
 
 static void m_button_double_callback(drv_button_event_t event, void *usr_data)
@@ -91,6 +105,7 @@ static void m_button_double_callback(drv_button_event_t event, void *usr_data)
     (void) event;
     (void) usr_data;
     ESP_LOGI("SYSTEM_BUTTON", "Button Double Clicked!");
+    m_publish_button_event(SYS_BUTTON_EVENT_DOUBLE_CLICK);
 }
 
 static void m_button_hold_callback(drv_button_event_t event, void *usr_data)
@@ -98,6 +113,7 @@ static void m_button_hold_callback(drv_button_event_t event, void *usr_data)
     (void) event;
     (void) usr_data;
     ESP_LOGI("SYSTEM_BUTTON", "Button Held!");
+    m_publish_button_event(SYS_BUTTON_EVENT_HOLD_1S);
 }
 
 // static void m_button_long_press_callback(drv_button_event_t event, void *usr_data)

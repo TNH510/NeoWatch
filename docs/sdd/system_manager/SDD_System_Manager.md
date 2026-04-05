@@ -1,194 +1,50 @@
-# System Manager Detailed Design Document
+# System Manager — Detailed Design Document
 
-## Overview
+## 1. Overview
 
-The System Manager is responsible for managing the overall system operations, including coordinating between different components, handling system events, and ensuring smooth functioning of the entire system. It acts as a central hub that oversees the interactions between various subsystems and ensures that they work together seamlessly.
+The System Manager is the central coordinator of the NeoWatch firmware. It routes all inter-subsystem communication through dedicated message queues so that no subsystem calls another directly. This decoupled, event-driven design gives three key advantages:
 
-## Concept: Message Queue-Based Event Management
+- **Loose coupling** — subsystems only know about events, not each other's internals.
+- **Async processing** — each subsystem drains its own queue at its own pace; nothing blocks.
+- **Independent testability** — any subsystem can be tested with a mock queue.
 
-### Purpose
+### Subsystems
 
-The System Manager implements an event-driven architecture using message queues to decouple interactions between different system layers and components. This approach provides a flexible, scalable, and maintainable solution for inter-system communication.
+| Subsystem | Responsibility |
+|-----------|---------------|
+| **Button** | Detects physical input, provides haptic/LED feedback |
+| **Display** | Renders content on screen, manages brightness and sleep |
+| **UI** | Manages screen navigation, widget state, themes |
+| **Network** | BLE communication, data sync with the companion app |
+| **Settings** | Persists and validates user preferences |
 
-### Key Principles
+---
 
-#### 1. **Decoupled Architecture**
+## 2. Architecture
 
-- Different system layers (UI, Network, Display, Settings, Button) communicate through message queues rather than direct function calls
-- Components do not need to know about each other's internal implementation
-- Reduces tight coupling and facilitates independent development and testing
+### How It Works
 
-#### 2. **Event-Driven Communication**
-
-- All system interactions are represented as discrete events/messages
-- Each event contains relevant data needed for processing
-- Events are published to queues and consumed by interested subscribers
-
-#### 3. **Asynchronous Processing**
-
-- Messages are queued and processed in order
-- Prevents blocking operations between components
-- Improves system responsiveness and overall performance
-
-### Architecture Components
-
-#### Message Queue Manager
-
-- Central component that manages all message queues
-- Handles message routing based on event type
-- Maintains queue priorities if needed
-
-#### Event Publishers
-
-- System layers that generate events (Button input, Network data, Settings changes)
-- Publish events to the relevant message queues
-- Do not wait for processing results
-
-#### Event Subscribers/Consumers
-
-- System components that listen to and process events
-- React to specific event types
-- Execute appropriate actions based on event data
-
-### Message Types
-
-```
-UI Events:
-├── Button Press Events
-├── Touch Events
-├── Display Interaction Events
-└── Settings Update Events
-
-Network Events:
-├── Data Received Events
-├── Connection Status Events
-├── Sync Events
-└── Error Events
-
-System Events:
-├── Power State Changes
-├── Mode Changes
-├── Configuration Updates
-└── System Health Events
-```
-
-### Benefits
-
-1. **Scalability**: Easy to add new components or event types without modifying existing code
-2. **Maintainability**: Clear separation of concerns and reduced code dependencies
-3. **Testability**: Components can be tested in isolation with mock message queues
-4. **Reliability**: Events can be logged and replayed for debugging
-5. **Flexibility**: Events can be processed synchronously or asynchronously as needed
-6. **Priority Handling**: Different event types can be assigned different priority levels
-
-### Implementation Considerations
-
-- Queue depth management to prevent memory overflow
-- Event timeout mechanisms for unprocessed messages
-- Error handling and recovery for failed event processing
-- Logging and monitoring of message flow
-- Performance optimization for high-frequency events
-
-## Sequence Diagram
-
-### Example: Button Press Event Flow with System Queues
-
-```mermaid
-sequenceDiagram
-    participant Button as Button System
-    participant MQM as Message Queue<br/>Manager
-    participant BtnQ as Button<br/>Queue
-    participant DispQ as Display<br/>Queue
-    participant UIQ as UI<br/>Queue
-    participant NetQ as Network<br/>Queue
-    participant SetQ as Settings<br/>Queue
-    participant Display as Display System
-    participant UI as UI System
-    participant Network as Network System
-    participant Settings as Settings System
-
-    Button->>MQM: Publish ButtonPressEvent<br/>(button_id, timestamp)
-    activate MQM
-    MQM->>MQM: Validate & Route Event
-    deactivate MQM
-
-    rect rgb(200, 220, 255)
-    note over MQM,SetQ: Distributing to System Queues
-    
-    MQM->>DispQ: Enqueue ButtonEvent<br/>{action: "refresh"}
-    activate DispQ
-    
-    MQM->>UIQ: Enqueue ButtonEvent<br/>{action: "update_state"}
-    activate UIQ
-    
-    MQM->>SetQ: Enqueue ButtonEvent<br/>{check: "settings_needed"}
-    activate SetQ
-    
-    MQM->>NetQ: Enqueue ButtonEvent<br/>{log: true}
-    activate NetQ
-    
-    MQM->>BtnQ: Enqueue ButtonEvent<br/>{action: "feedback"}
-    activate BtnQ
-    end
-
-    rect rgb(220, 240, 220)
-    note over Display,Button: Systems Processing from Queues
-    
-    par Display System
-        Display->>DispQ: Dequeue ButtonEvent
-        DispQ-->>Display: Return event
-        Display->>Display: Process: refresh display<br/>update state
-        Display->>MQM: Publish DisplayUpdateEvent
-    and UI System
-        UI->>UIQ: Dequeue ButtonEvent
-        UIQ-->>UI: Return event
-        UI->>UI: Process: update UI state<br/>handle navigation
-        UI->>MQM: Publish UIStateChangeEvent
-    and Settings System
-        Settings->>SetQ: Dequeue ButtonEvent
-        SetQ-->>Settings: Return event
-        Settings->>Settings: Check if settings<br/>adjustment needed
-        Settings->>MQM: Publish SettingsCheckEvent
-    and Network System
-        Network->>NetQ: Dequeue ButtonEvent
-        NetQ-->>Network: Return event
-        Network->>Network: Log event for<br/>synchronization
-        Network->>MQM: Publish SyncLogEvent
-    and Button System
-        Button->>BtnQ: Dequeue ButtonEvent
-        BtnQ-->>Button: Return event
-        Button->>Button: Provide feedback<br/>LED/Vibration
-        Button->>MQM: Publish FeedbackEvent
-    end
-    end
-
-    deactivate DispQ
-    deactivate UIQ
-    deactivate SetQ
-    deactivate NetQ
-    deactivate BtnQ
-
-    MQM->>MQM: Log ButtonPressEvent<br/>in system history<br/>Clear processed events
-```
-
-### Queue Interaction Pattern
+1. A subsystem (e.g. Button) **publishes** an event to the System Manager.
+2. The System Manager **validates** the event and **routes** it to the relevant queue(s).
+3. Each target subsystem **dequeues** and **processes** the event independently.
+4. After processing, a subsystem may **publish a response event** back through the System Manager (e.g. `DisplayUpdateEvent`).
 
 ```mermaid
 graph TD
-    A["Button System<br/>Publishes Event"] -->|"ButtonPressEvent"| B["Message Queue<br/>Manager"]
-    
-    B -->|"Post to Queue"| C["Button Queue<br/>FIFO: Q_BTN"]
-    B -->|"Post to Queue"| D["Display Queue<br/>FIFO: Q_DIS"]
-    B -->|"Post to Queue"| E["UI Queue<br/>FIFO: Q_UI"]
-    B -->|"Post to Queue"| F["Network Queue<br/>FIFO: Q_NET"]
-    B -->|"Post to Queue"| G["Settings Queue<br/>FIFO: Q_SET"]
-    
-    C -->|"Dequeue & Process"| H["Button System<br/>Executes Action"]
-    D -->|"Dequeue & Process"| I["Display System<br/>Updates Display"]
-    E -->|"Dequeue & Process"| J["UI System<br/>Updates Interface"]
-    F -->|"Dequeue & Process"| K["Network System<br/>Logs/Syncs"]
-    G -->|"Dequeue & Process"| L["Settings System<br/>Validates"]
-    
+    A["Any Subsystem<br/>(Publisher)"] -->|"Event"| B["System Manager<br/>(Router)"]
+
+    B -->|"Post"| C["Button Queue<br/>Q_BTN"]
+    B -->|"Post"| D["Display Queue<br/>Q_DIS"]
+    B -->|"Post"| E["UI Queue<br/>Q_UI"]
+    B -->|"Post"| F["Network Queue<br/>Q_NET"]
+    B -->|"Post"| G["Settings Queue<br/>Q_SET"]
+
+    C -->|"Dequeue"| H["Button System"]
+    D -->|"Dequeue"| I["Display System"]
+    E -->|"Dequeue"| J["UI System"]
+    F -->|"Dequeue"| K["Network System"]
+    G -->|"Dequeue"| L["Settings System"]
+
     H -->|"Response Event"| B
     I -->|"Response Event"| B
     J -->|"Response Event"| B
@@ -196,186 +52,152 @@ graph TD
     L -->|"Response Event"| B
 ```
 
-### Event Flow Timeline
+---
 
-```
-Time | Button        | MQM               | Display         | UI              | Network
------|---------------|-------------------|-----------------|-----------------|----------
-T0   | Detect Press  |                   |                 |                 |
-T1   | Publish Event | ✓ Receive         | ✓ Queue         | ✓ Queue         |
-T2   |               | Route to all      |                 |                 |
-T3   |               |                   | Process & Reply | Process & Reply |
-T4   |               |                   | ✓ Update done   | ✓ Update done   |
-T5   |               |                   |                 |                 | ✓ Queue
-T6   |               |                   |                 |                 | Process
-T7   |               | ✓ All events      |                 |                 |
-     |               | processed         |                 |                 |
-```
+## 3. Event Types
 
-### Message Queue Structure
+Events are grouped into three categories:
 
-```
-┌─────────────────────────────────────────────────────┐
-│           System Manager - Message Hub              │
-├─────────────────────────────────────────────────────┤
-│                                                     │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐         │
-│  │  Button  │  │  Network │  │ Settings │         │
-│  │  Queue   │  │  Queue   │  │  Queue   │         │
-│  └──────────┘  └──────────┘  └──────────┘         │
-│       ↑             ↑              ↑               │
-│       └─────────────┼──────────────┘               │
-│                     │                             │
-│           Message Queue Router                    │
-│                     │                             │
-│       ┌─────────────┼──────────────┐             │
-│       ↓             ↓              ↓             │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐      │
-│  │ Display  │  │   UI     │  │ System   │      │
-│  │  Queue   │  │  Queue   │  │  Queue   │      │
-│  └──────────┘  └──────────┘  └──────────┘      │
-│                                                │
-└─────────────────────────────────────────────────┘
-```
+| Category | Events |
+|----------|--------|
+| **UI** | Button press, touch input, display interaction, settings update |
+| **Network** | Data received, connection status change, sync request, error |
+| **System** | Power state change, mode change, configuration update, health check |
 
-## System Queue Architecture
+Each event carries a payload with the data needed for processing (e.g. `button_id`, `timestamp`, action parameters).
 
-### Overview
+---
 
-Each subsystem (Button, Display, UI, Network, Settings) maintains its own dedicated message queue to receive and process events sent from the System Manager. This ensures that each system can process events at its own pace without interfering with other systems.
+## 4. Queue Configuration
 
-### Queue Configuration Per System
+Every subsystem owns a dedicated FIFO queue. The table below summarises their roles:
 
-#### 1. **Button System Queue**
+| Queue | ID | Depth | Priority | Inbound Event Examples |
+|-------|----|-------|----------|----------------------|
+| **Button** | `Q_BTN` | 32 | High | LED control, vibration feedback, recalibration |
+| **Display** | `Q_DIS` | 32 | High | Refresh, brightness change, sleep/wake |
+| **UI** | `Q_UI` | 64 | Medium-High | Screen navigation, widget update, theme change |
+| **Network** | `Q_NET` | 32 | Medium | Connect/disconnect, data TX, sync schedule |
+| **Settings** | `Q_SET` | 32 | Medium-Low | Value change, config update, validation request |
 
-- **Purpose**: Receive button-related commands and state change events from System Manager
-- **Event Types**:
-  - LED control events
-  - Vibration feedback requests
-  - State synchronization events
-  - Reset/Recalibration commands
-- **Queue Depth**: Configurable (e.g., 32-64 events)
-- **Processing Priority**: High (real-time user interaction)
+> Queue depths are initial recommendations and can be tuned via `menuconfig` or compile-time constants.
 
-#### 2. **Display System Queue**
+---
 
-- **Purpose**: Receive display update commands and rendering instructions
-- **Event Types**:
-  - Refresh/Update display events
-  - Brightness control events
-  - Content change notifications
-  - Sleep/Wake commands
-- **Queue Depth**: Configurable (e.g., 32-64 events)
-- **Processing Priority**: High (visual feedback)
+## 5. Event Flow — Detailed Example
 
-#### 3. **UI System Queue**
+### 5.1 Button Press
 
-- **Purpose**: Receive UI state changes and interaction events
-- **Event Types**:
-  - Screen navigation events
-  - UI component update events
-  - Input events
-  - Theme/Language change events
-- **Queue Depth**: Configurable (e.g., 64-128 events)
-- **Processing Priority**: Medium-High
+The sequence below shows exactly what happens when a user presses a button:
 
-#### 4. **Network System Queue**
+```mermaid
+sequenceDiagram
+    participant Button as Button System
+    participant MQM as System Manager
+    participant BtnQ as Q_BTN
+    participant DispQ as Q_DIS
+    participant UIQ as Q_UI
+    participant NetQ as Q_NET
+    participant SetQ as Q_SET
+    participant Display as Display System
+    participant UI as UI System
+    participant Network as Network System
+    participant Settings as Settings System
 
-- **Purpose**: Receive network commands and synchronization requests
-- **Event Types**:
-  - Connect/Disconnect commands
-  - Data transmission requests
-  - Sync schedule events
-  - Connection status change events
-- **Queue Depth**: Configurable (e.g., 32-64 events)
-- **Processing Priority**: Medium
+    Button->>MQM: Publish ButtonPressEvent<br/>(button_id, timestamp)
+    activate MQM
+    MQM->>MQM: Validate & Route
+    deactivate MQM
 
-#### 5. **Settings System Queue**
+    rect rgb(200, 220, 255)
+    note over MQM,SetQ: Route to all relevant queues
+    MQM->>DispQ: {action: "refresh"}
+    MQM->>UIQ: {action: "update_state"}
+    MQM->>SetQ: {check: "settings_needed"}
+    MQM->>NetQ: {log: true}
+    MQM->>BtnQ: {action: "feedback"}
+    end
 
-- **Purpose**: Receive settings update requests and configuration changes
-- **Event Types**:
-  - Settings value change events
-  - Configuration update events
-  - Preference reset events
-  - Settings validation requests
-- **Queue Depth**: Configurable (e.g., 32-64 events)
-- **Processing Priority**: Medium-Low
+    rect rgb(220, 240, 220)
+    note over Display,Button: Each subsystem processes in parallel
+    par
+        Display->>DispQ: Dequeue
+        DispQ-->>Display: Event
+        Display->>Display: Refresh screen
+        Display->>MQM: DisplayUpdateEvent
+    and
+        UI->>UIQ: Dequeue
+        UIQ-->>UI: Event
+        UI->>UI: Update navigation state
+        UI->>MQM: UIStateChangeEvent
+    and
+        Settings->>SetQ: Dequeue
+        SetQ-->>Settings: Event
+        Settings->>Settings: Check if adjustment needed
+        Settings->>MQM: SettingsCheckEvent
+    and
+        Network->>NetQ: Dequeue
+        NetQ-->>Network: Event
+        Network->>Network: Log for sync
+        Network->>MQM: SyncLogEvent
+    and
+        Button->>BtnQ: Dequeue
+        BtnQ-->>Button: Event
+        Button->>Button: LED/vibration feedback
+        Button->>MQM: FeedbackEvent
+    end
+    end
 
-### Queue Processing Model
-
-```
-System Manager
-       │
-       ├─► Dequeue Event
-       ├─► Validate Event
-       ├─► Route to Target System
-       │
-       ├─► [(Button Queue) ◄─ Button System]
-       │       │
-       │       ├─► Dequeue & Process
-       │       ├─► Execute Action
-       │       └─► Publish Response
-       │
-       ├─► [(Display Queue) ◄─ Display System]
-       │       │
-       │       ├─► Dequeue & Process
-       │       ├─► Update Display State
-       │       └─► Publish Completion Event
-       │
-       ├─► [(UI Queue) ◄─ UI System]
-       │       │
-       │       ├─► Dequeue & Process
-       │       ├─► Update UI
-       │       └─► Publish Completion Event
-       │
-       ├─► [(Network Queue) ◄─ Network System]
-       │       │
-       │       ├─► Dequeue & Process
-       │       ├─► Perform Network Task
-       │       └─► Publish Result Event
-       │
-       └─► [(Settings Queue) ◄─ Settings System]
-               │
-               ├─► Dequeue & Process
-               ├─► Apply Settings
-               └─► Publish Confirmation Event
+    MQM->>MQM: Log completed event cycle
 ```
 
-### Queue Management Features
+### 5.2 Settings Change
 
-**Per-Queue Features**:
-
-- **FIFO Processing**: Events are processed in First-In-First-Out order
-- **Event Timeouts**: Unprocessed events after timeout are discarded/logged
-- **Queue Overflow Handling**:
-  - Drop oldest event or reject new event based on priority
-  - System alert when queue reaches threshold
-- **Event Acknowledgment**: System publishes ACK/NACK after processing
-- **Event Logging**: All events in queue are logged for debugging
-
-**Cross-Queue Coordination**:
-
-- System Manager can query queue status of each system
-- Prioritize urgent events across queues
-- Load balancing to prevent single system bottleneck
-- Deadlock detection and recovery
-
-### Event Flow Example: Settings Change
+A simpler flow showing how a settings change cascades:
 
 ```
-1. User requests settings change
-   └─► System Manager: Publish SettingsChangeEvent
-   
-2. Event Published to Settings Queue
-   └─► Settings System: Dequeue event
-   
-3. Settings System Processes
-   └─► Validate new settings
-   └─► Apply changes to storage
-   └─► Publish SettingsAppliedEvent to System Manager
-   
-4. System Manager Receives Confirmation
-   └─► Route to dependent systems (UI, Network, etc.)
-   └─► Send UI update events to Display & UI queues
-   └─► Update network sync if applicable
+1. User changes a setting (via UI)
+   → System Manager publishes SettingsChangeEvent to Q_SET
+
+2. Settings System dequeues the event
+   → Validates the new value
+   → Persists to storage
+   → Publishes SettingsAppliedEvent back to System Manager
+
+3. System Manager routes the confirmation
+   → Q_DIS  — display refreshes to show new value
+   → Q_UI   — UI updates any affected widgets
+   → Q_NET  — syncs the change to companion app (if connected)
 ```
+
+---
+
+## 6. Queue Management
+
+### Per-Queue Rules
+
+| Rule | Description |
+|------|-------------|
+| **FIFO ordering** | Events are processed in the order they arrive |
+| **Timeout** | Unprocessed events are discarded and logged after a configurable timeout |
+| **Overflow** | When a queue is full, the oldest event is dropped (or the new event is rejected, depending on priority) and an alert is raised |
+| **Acknowledgment** | After processing, the subsystem publishes an ACK (success) or NACK (failure) event |
+| **Logging** | Every enqueue/dequeue operation is recorded for debugging |
+
+### Cross-Queue Coordination
+
+- The System Manager can **query any queue's depth** to detect backpressure.
+- **Urgent events** (e.g. low battery) can be promoted across all queues.
+- A simple **deadlock watchdog** monitors for queues that stop draining.
+
+---
+
+## 7. Design Considerations
+
+| Concern | Mitigation |
+|---------|-----------|
+| Memory overflow | Bounded queue depths; overflow policy per queue |
+| Stale events | Timeout mechanism discards events older than threshold |
+| Failed processing | NACK event triggers retry or escalation |
+| High-frequency events | Debounce at the publisher; coalesce duplicate events in the queue |
+| Debugging | Full event log with timestamps; events can be replayed offline |

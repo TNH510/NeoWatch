@@ -10,13 +10,13 @@ The System Manager is the central coordinator of the NeoWatch firmware. It route
 
 ### Subsystems
 
-| Subsystem | Responsibility |
-|-----------|---------------|
-| **Button** | Detects physical input, provides haptic/LED feedback |
-| **Display** | Renders content on screen, manages brightness and sleep |
-| **UI** | Manages screen navigation, widget state, themes |
-| **Network** | BLE communication, data sync with the companion app |
-| **Settings** | Persists and validates user preferences |
+| Subsystem    | Responsibility                                          |
+| ------------ | ------------------------------------------------------- |
+| **Button**   | Detects physical input, provides haptic/LED feedback    |
+| **Display**  | Renders content on screen, manages brightness and sleep |
+| **UI**       | Manages screen navigation, widget state, themes         |
+| **Network**  | BLE communication, data sync with the companion app     |
+| **Settings** | Persists and validates user preferences                 |
 
 ---
 
@@ -58,11 +58,11 @@ graph TD
 
 Events are grouped into three categories:
 
-| Category | Events |
-|----------|--------|
-| **UI** | Button press, touch input, display interaction, settings update |
-| **Network** | Data received, connection status change, sync request, error |
-| **System** | Power state change, mode change, configuration update, health check |
+| Category    | Events                                                              |
+| ----------- | ------------------------------------------------------------------- |
+| **UI**      | Button press, touch input, display interaction, settings update     |
+| **Network** | Data received, connection status change, sync request, error        |
+| **System**  | Power state change, mode change, configuration update, health check |
 
 Each event carries a payload with the data needed for processing (e.g. `button_id`, `timestamp`, action parameters).
 
@@ -72,13 +72,13 @@ Each event carries a payload with the data needed for processing (e.g. `button_i
 
 Every subsystem owns a dedicated FIFO queue. The table below summarises their roles:
 
-| Queue | ID | Depth | Priority | Inbound Event Examples |
-|-------|----|-------|----------|----------------------|
-| **Button** | `Q_BTN` | 32 | High | LED control, vibration feedback, recalibration |
-| **Display** | `Q_DIS` | 32 | High | Refresh, brightness change, sleep/wake |
-| **UI** | `Q_UI` | 64 | Medium-High | Screen navigation, widget update, theme change |
-| **Network** | `Q_NET` | 32 | Medium | Connect/disconnect, data TX, sync schedule |
-| **Settings** | `Q_SET` | 32 | Medium-Low | Value change, config update, validation request |
+| Queue        | ID      | Depth | Priority    | Inbound Event Examples                          |
+| ------------ | ------- | ----- | ----------- | ----------------------------------------------- |
+| **Button**   | `Q_BTN` | 32    | High        | LED control, vibration feedback, recalibration  |
+| **Display**  | `Q_DIS` | 32    | High        | Refresh, brightness change, sleep/wake          |
+| **UI**       | `Q_UI`  | 64    | Medium-High | Screen navigation, widget update, theme change  |
+| **Network**  | `Q_NET` | 32    | Medium      | Connect/disconnect, data TX, sync schedule      |
+| **Settings** | `Q_SET` | 32    | Medium-Low  | Value change, config update, validation request |
 
 > Queue depths are initial recommendations and can be tuned via `menuconfig` or compile-time constants.
 
@@ -176,13 +176,13 @@ A simpler flow showing how a settings change cascades:
 
 ### Per-Queue Rules
 
-| Rule | Description |
-|------|-------------|
-| **FIFO ordering** | Events are processed in the order they arrive |
-| **Timeout** | Unprocessed events are discarded and logged after a configurable timeout |
-| **Overflow** | When a queue is full, the oldest event is dropped (or the new event is rejected, depending on priority) and an alert is raised |
-| **Acknowledgment** | After processing, the subsystem publishes an ACK (success) or NACK (failure) event |
-| **Logging** | Every enqueue/dequeue operation is recorded for debugging |
+| Rule               | Description                                                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| **FIFO ordering**  | Events are processed in the order they arrive                                                                                  |
+| **Timeout**        | Unprocessed events are discarded and logged after a configurable timeout                                                       |
+| **Overflow**       | When a queue is full, the oldest event is dropped (or the new event is rejected, depending on priority) and an alert is raised |
+| **Acknowledgment** | After processing, the subsystem publishes an ACK (success) or NACK (failure) event                                             |
+| **Logging**        | Every enqueue/dequeue operation is recorded for debugging                                                                      |
 
 ### Cross-Queue Coordination
 
@@ -194,10 +194,10 @@ A simpler flow showing how a settings change cascades:
 
 ## 7. Design Considerations
 
-| Concern | Mitigation |
-|---------|-----------|
-| Memory overflow | Bounded queue depths; overflow policy per queue |
-| Stale events | Timeout mechanism discards events older than threshold |
-| Failed processing | NACK event triggers retry or escalation |
+| Concern               | Mitigation                                                        |
+| --------------------- | ----------------------------------------------------------------- |
+| Memory overflow       | Bounded queue depths; overflow policy per queue                   |
+| Stale events          | Timeout mechanism discards events older than threshold            |
+| Failed processing     | NACK event triggers retry or escalation                           |
 | High-frequency events | Debounce at the publisher; coalesce duplicate events in the queue |
-| Debugging | Full event log with timestamps; events can be replayed offline |
+| Debugging             | Full event log with timestamps; events can be replayed offline    |

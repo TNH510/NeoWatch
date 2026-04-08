@@ -41,7 +41,9 @@ This keeps UI logic decoupled from display drivers and backend subsystems.
 
 ---
 
-## 4. UI Event Enum Definitions
+## 4. UI Event Enum Definitions (Implemented)
+
+All enums are defined in `system_manager_events.h`.
 
 ### 4.1 System Manager -> UI Commands
 
@@ -52,16 +54,13 @@ typedef enum
   SYS_UI_CMD_MODE_STANDBY,
   SYS_UI_CMD_MODE_MENU,
   SYS_UI_CMD_MODE_SETTING,
-
   SYS_UI_CMD_SHOW_NOTIFICATION,
   SYS_UI_CMD_HIDE_NOTIFICATION,
   SYS_UI_CMD_LED_SET_STATE,
   SYS_UI_CMD_LED_CLEAR,
-
   SYS_UI_CMD_APP_CONNECTED,
   SYS_UI_CMD_APP_DISCONNECTED,
   SYS_UI_CMD_ERROR_STATE,
-
   SYS_UI_CMD_MAX
 } system_ui_cmd_t;
 ```
@@ -86,11 +85,11 @@ typedef enum
 
 Use RGB LED to indicate system states as follows:
 
-| State | LED Behavior | Priority |
-|------|--------------|----------|
-| System Error | Flash red rapidly (for example 4 Hz) | Highest |
-| App Connected | Green solid | Medium |
-| Normal Operation | Off | Lowest |
+| State            | LED Behavior                         | Priority |
+| ---------------- | ------------------------------------ | -------- |
+| System Error     | Flash red rapidly (for example 4 Hz) | Highest  |
+| App Connected    | Green solid                          | Medium   |
+| Normal Operation | Off                                  | Lowest   |
 
 Rules:
 
@@ -119,31 +118,30 @@ These events allow richer UI behavior without coupling UI directly to Network or
 
 ---
 
-## 7. Queue Message Contracts (Q_UI)
+## 7. Queue Message Contract (Q_UI)
 
-### 7.1 Command Message
+UI events use the unified `sm_event_msg_t` (defined in `system_manager_events.h`):
 
 ```c
 typedef struct
 {
-  system_ui_cmd_t cmd;
-  uint32_t timestamp_ms;
-  uint8_t arg0;
-  uint8_t arg1;
-  uint16_t payload_id;
-} system_ui_cmd_msg_t;
+    sm_event_source_t source;       /* SM_SRC_UI or SM_SRC_MANAGER       */
+    uint16_t          event_id;     /* system_ui_cmd_t or system_ui_evt_t */
+    uint32_t          timestamp_ms;
+    union {
+        struct {
+            uint8_t arg0;           /* command-specific argument 0       */
+            uint8_t arg1;           /* command-specific argument 1       */
+        } ui;
+        /* other subsystem payloads omitted */
+    } data;
+} sm_event_msg_t;
 ```
 
-### 7.2 Event Message
+Public API for sending commands to Q_UI:
 
 ```c
-typedef struct
-{
-  system_ui_evt_t evt;
-  uint32_t timestamp_ms;
-  base_status_t status;
-  uint16_t data;
-} system_ui_evt_msg_t;
+base_status_t system_ui_send_cmd(system_ui_cmd_t cmd, uint8_t arg0, uint8_t arg1);
 ```
 
 Guidelines:

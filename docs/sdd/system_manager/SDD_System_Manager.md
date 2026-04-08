@@ -56,15 +56,66 @@ graph TD
 
 ## 3. Event Types
 
-Events are grouped into three categories:
+Events are grouped by source subsystem:
 
-| Category    | Events                                                              |
-| ----------- | ------------------------------------------------------------------- |
-| **UI**      | Button press, touch input, display interaction, settings update     |
-| **Network** | Data received, connection status change, sync request, error        |
-| **System**  | Power state change, mode change, configuration update, health check |
+| Source       | Event Enum                                         | Description                          |
+| ------------ | -------------------------------------------------- | ------------------------------------ |
+| **Button**   | `system_button_event_t`                            | Click, double click, hold 1 s        |
+| **Display**  | `system_display_event_t`                           | Mode switch, refresh, brightness     |
+| **UI**       | `system_ui_cmd_t` / `system_ui_evt_t`              | Mode, notifications, LED, app status |
+| **Settings** | `system_settings_cmd_t` / `system_settings_evt_t`  | Set/get preferences, factory reset   |
+| **Network**  | *(not yet implemented)*                            | BLE connection, data sync, theme     |
 
-Each event carries a payload with the data needed for processing (e.g. `button_id`, `timestamp`, action parameters).
+Each event carries a payload via the unified `sm_event_msg_t` structure (see section 3.1).
+
+### 3.1 Unified Event Message
+
+All subsystems communicate through a single message type posted to System Manager or subsystem queues:
+
+```c
+typedef struct
+{
+    sm_event_source_t source;       /* Which subsystem sent this       */
+    uint16_t          event_id;     /* Enum value from subsystem type  */
+    uint32_t          timestamp_ms;
+    union
+    {
+        struct { uint8_t button_id; }                       button;
+        struct { uint8_t brightness; uint8_t mode; }        display;
+        struct { uint8_t arg0; uint8_t arg1; }              ui;
+        struct { uint8_t brightness; uint8_t clock_type;
+                 int8_t  time_zone; }                       settings;
+    } data;
+} sm_event_msg_t;
+```
+
+Source identifiers:
+
+```c
+typedef enum
+{
+    SM_SRC_BUTTON = 0,
+    SM_SRC_DISPLAY,
+    SM_SRC_UI,
+    SM_SRC_NETWORK,
+    SM_SRC_SETTINGS,
+    SM_SRC_MANAGER,
+    SM_SRC_MAX
+} sm_event_source_t;
+```
+
+### 3.2 System Modes
+
+```c
+typedef enum
+{
+    SM_MODE_BOOT = 0,
+    SM_MODE_STANDBY,
+    SM_MODE_MENU,
+    SM_MODE_SETTING,
+    SM_MODE_MAX
+} sm_mode_t;
+```
 
 ---
 
@@ -155,7 +206,7 @@ sequenceDiagram
 
 A simpler flow showing how a settings change cascades:
 
-```
+```text
 1. User changes a setting (via UI)
    → System Manager publishes SettingsChangeEvent to Q_SET
 

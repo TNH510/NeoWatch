@@ -21,9 +21,9 @@ This keeps display logic isolated from business logic and preserves async proces
 
 ---
 
-## 3. Display Event Enum
+## 3. Display Event Enum (Implemented)
 
-The following enum is recommended for app-level display commands carried in Q_DIS:
+The following enum is defined in `system_manager_events.h`:
 
 ```c
 typedef enum
@@ -32,25 +32,18 @@ typedef enum
   SYS_DISPLAY_EVENT_MODE_STANDBY,
   SYS_DISPLAY_EVENT_MODE_MENU,
   SYS_DISPLAY_EVENT_MODE_SETTING,
-
   SYS_DISPLAY_EVENT_REFRESH,
   SYS_DISPLAY_EVENT_BRIGHTNESS_SET,
   SYS_DISPLAY_EVENT_SLEEP,
   SYS_DISPLAY_EVENT_WAKE,
-
-  SYS_DISPLAY_EVENT_NOTIFICATION_SHOW,
-  SYS_DISPLAY_EVENT_STATUS_ICON_UPDATE,
-
-  SYS_DISPLAY_EVENT_ERROR_OVERLAY,
-
   SYS_DISPLAY_EVENT_MAX
 } system_display_event_t;
 ```
 
 Notes:
 
-- The first 4 events complete your current System Mode Update requirement.
-- The remaining events are recommended for practical watch behavior.
+- The first 4 events handle System Mode Update.
+- REFRESH, BRIGHTNESS_SET, SLEEP, WAKE handle display control.
 
 ---
 
@@ -93,7 +86,7 @@ Reason:
 
 - Aligns with Settings subsystem (brightness already exists in settings data).
 
-### 5.3 Notifications and Status
+### 5.3 Notifications and Status (Not Yet Implemented)
 
 - SYS_DISPLAY_EVENT_NOTIFICATION_SHOW
 - SYS_DISPLAY_EVENT_STATUS_ICON_UPDATE
@@ -102,7 +95,7 @@ Reason:
 
 - UI and Network can request visual status updates without direct display coupling.
 
-### 5.4 Error UX
+### 5.4 Error UX (Not Yet Implemented)
 
 - SYS_DISPLAY_EVENT_ERROR_OVERLAY
 
@@ -114,15 +107,22 @@ Reason:
 
 ## 6. Message Contract for Q_DIS
 
+Display events use the unified `sm_event_msg_t` (defined in `system_manager_events.h`):
+
 ```c
 typedef struct
 {
-  system_display_event_t event;
-  uint32_t timestamp_ms;
-  uint8_t brightness;     // used by BRIGHTNESS_SET
-  uint8_t mode;           // optional mode metadata
-  uint16_t payload_id;    // notification/status/error id
-} system_display_msg_t;
+    sm_event_source_t source;       /* SM_SRC_DISPLAY                    */
+    uint16_t          event_id;     /* system_display_event_t value      */
+    uint32_t          timestamp_ms;
+    union {
+        struct {
+            uint8_t brightness;     /* used by BRIGHTNESS_SET            */
+            uint8_t mode;           /* optional mode metadata            */
+        } display;
+        /* other subsystem payloads omitted */
+    } data;
+} sm_event_msg_t;
 ```
 
 Guidelines:
